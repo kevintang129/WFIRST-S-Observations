@@ -156,31 +156,31 @@ opt_out = opt_in ;
   if ~isfield( opt_in, 'inv' )
   opt_out.inv = 0 ; %
   end
-  if ~isfield( opt_in, 'target.name' )
+  if ~isfield( opt_in.target, 'name' )
   opt_out.target.name = { 'tau_ceti' } ; % string with the name of the star or system
   end
-  if ~isfield( opt_in, 'target.fom' )
+  if ~isfield( opt_in.target, 'fom' )
   opt_out.target.fom = [ 1 ] ; % It can be a list of objects
   end
-  if ~isfield( opt_in, 'target.radec' )
+  if ~isfield( opt_in.target, 'radec' )
   opt_out.target.radec = { [ 0, 0 ] } ; % degrees. It can be a list of objects
   end
-  if ~isfield( opt_in, 'target.pm' )
+  if ~isfield( opt_in.target, 'pm' )
   opt_out.target.pm = { [ 0, 0 ] } ; % degrees. It can be a list of objects
   end
-  if ~isfield( opt_in, 'target.pax' )
+  if ~isfield( opt_in.target, 'pax' )
   opt_out.target.pax = [ 0 ] ; % degrees. It can be a list of objects
   end
-  if ~isfield( opt_in, 'target.day_obs_string' )
+  if ~isfield( opt_in.target, 'day_obs_string' )
   opt_out.target.day_obs_string = '' ; 
   end
-  if ~isfield( opt_in, 'target.n_days_obs' )
+  if ~isfield( opt_in.target, 'n_days_obs' )
   opt_out.target.n_days_obs = 0 ; 
   end
-  if ~isfield( opt_in, 'target.n_window' )
+  if ~isfield( opt_in.target, 'n_window' )
   opt_out.target.n_window = 0 ; 
   end
-  if ~isfield( opt_in, 'target.days_list' )
+  if ~isfield( opt_in.target, 'days_list' )
   opt_out.target.days_list = { [ NaN, NaN, NaN, NaN ] } ;
   end
   if ~isfield( opt_in, 'camera_pixel' )
@@ -189,7 +189,7 @@ opt_out = opt_in ;
   if ~isfield( opt_in, 'days_interval' )
   opt_out.days_interval = 90 ; % days
   end
-  if ~isfield( opt_in, 'target.label' )
+  if ~isfield( opt_in.target, 'label' )
   opt_out.target.label = '' ; % '': none, 'name', 'number'
   end
   if ~isfield( opt_in, 'pax_only' )
