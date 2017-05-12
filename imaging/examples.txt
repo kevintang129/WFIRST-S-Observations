@@ -1,0 +1,87 @@
+% Add path
+addpath( genpath( '/Users/srhildeb/caltech/mat/' ) ) ;
+
+% DEVELOPER EXAMPLE:
+opt.developer = 1 ; opt.save_path = 'out_dev' ; opt.save_all = 1 ; Nx = 16 ; makeStarshadeImage( Nx, 1000, 120, 0, opt ) ;
+
+
+%%%%%%%%%%%%%%%%%%%%%
+%   CALCULATIONS    %
+%%%%%%%%%%%%%%%%%%%%%
+% Minimum set of options
+opt.save_all = 1 ;
+% Studying the effect of increasing the resolution of the pupil (perfect pupil)
+makeStarshadeImage( 64, 100, 0, 0, opt, '0' ) ;
+makeStarshadeImage( 128, 100, 0, 0, opt, '0' ) ;
+
+% Studying the effect of increasing the resolution of the pupil (WFIRST pupil)
+makeStarshadeImage( 64, 100, 0, 0, opt ) ;
+makeStarshadeImage( 128, 100, 0, 0, opt ) ;
+
+% Studying the possibility of interpolation
+%% Check 64 is fine from previous results
+%% For the star:
+Nx = 64 ;
+% Minimum set of options
+opt.save_all = 1 ;
+makeStarshadeImage( Nx, 25, 0, 0, opt ) ;
+%% For the planet at 20 mas
+makeStarshadeImage( Nx, 25, 20, 0, opt ) ;
+%% For the planet at 60 mas
+makeStarshadeImage( Nx, 25, 60, 0, opt ) ;
+%% For the planet at 120 mas
+makeStarshadeImage( Nx, 25, 120, 0, opt ) ;
+
+%%%%%%%%%%%%%%
+%   PLOTS    %
+%%%%%%%%%%%%%%
+
+% Studying the effect of increasing the resolution of the pupil (perfect pupil)
+plotStarshadeImage( 64, 100, 0, 0, 0 )
+plotStarshadeImage( 128, 100, 0, 0, 0 )
+
+% Studying the effect of increasing the resolution of the pupil (WFIRST pupil)
+plotStarshadeImage( 64, 100, 0, 0 )
+plotStarshadeImage( 128, 100, 0, 0 )
+
+Nx = 64 ;
+plotStarshadeImage( Nx, 25, 0, 0 )
+%% For the planet at 20 mas
+plotStarshadeImage( Nx, 25, 20, 0 )
+%% For the planet at 60 mas
+plotStarshadeImage( Nx, 25, 60, 0 )
+%% For the planet at 120 mas
+plotStarshadeImage( Nx, 25, 120, 0 )
+
+%%%%%%%%%%%%%%%%%%%%
+%   SIMULATIONS    %
+%%%%%%%%%%%%%%%%%%%%
+
+% Simulation of some star & planets configuration
+opt.r_star = 0 ; % mas
+opt.psi_star = 0 ; % degrees
+opt.r_planet = [ 160, 160, 160, 160 ] ; % mas
+opt.phase_planet = [ 0, 90, 180, 270 ] ; % degrees
+opt.contrast_planet = [ 1e-9, 5e-10, 1e-10, 5e-11 ] ; % relative to the star
+opt.save = 1 ;
+opt.save_all = 0 ;
+opt.save_fig = 1 ;
+opt.save_fig_all = 0 ;
+starshade_simulation( opt ) ;
+
+
+% Simulation of some star & planets configuration
+opt.r_star = 0 ; % mas
+opt.psi_star = 0 ; % degrees
+opt.r_planet = [ 70, 120, 200, 300 ] ; % mas
+opt.phase_planet = [ 0, 120, 230, 270 ] ; % degrees
+opt.contrast_planet = 1e-9 * ( 70 ./ opt.r_planet ).^2 ; % relative to the star
+opt.save = 1 ;
+opt.save_all = 0 ;
+opt.save_fig = 1 ;
+opt.save_fig_all = 0 ;
+starshade_simulation( opt ) ;
+
+
+
+
