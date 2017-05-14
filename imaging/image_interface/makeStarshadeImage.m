@@ -1,74 +1,44 @@
-function [ efDefectImg, lambdaIn, vecPetalArray ] = makeStarshadeImage( Nx, delta_lambda, r_planet, psi_planet, opt, pupil_file )
+function [ efDefectImg, lambdaIn, vecPetalArray ] = makeStarshadeImage( opt )
 % makeStarshadeImage
-% Eric Cady, 4/25/17: first complete version
-% Sergi Hildebrandt, 4/29/17: modification of the interface, pupil handling, ...
-%
-% Include RGB colors
 % A sample program which creates a locus of edge point from an apodization
 % function and propagates the resulting field to a telescope focal plane.
+% History:
+% 4/25/17: first complete version, Eric Cady (JPL/Caltech)
+% 4/29/17: modification of the interface, pupil handling, ..., Sergi Hildebrandt (JPL/Caltech)
+%
+% TBD:
+% 1) Include RGB colors
 
-% Size of the pupil data in pixels (square)
-  if ~exist( 'Nx', 'var' )
-  Nx = 128 ;
+% Check some options are being passed
+  if ~exist( 'opt', 'var' )
+  disp( '(makeStarshadeImage) Provide some options: opt.x=y ; makeStarshadeImage( opt ) ;' )
+  return
   end
 
-% Step of wavelength to consider
-  if ~exist( 'delta_lambda', 'var' )
-  dlt_lmbd = 50 ; % nm
-  else
-  dlt_lmbd = delta_lambda ;
-  end
+% Get default options (look inside the function for specific definitions)
+opt = get_default_options( opt ) ;
 
-% Separation of the planet from the center of the pointing
-% This is temporary, meant for tests only
-  if ~exist( 'r_planet' )
-  r_plnt = 0 ; % mas
-  else
-  r_plnt = floor( r_planet ) ;
-  end
+% Developer version? Here is just this
+  if ( opt.developer ), units_image ; else, units ; end
 
-% Angle of the planet with respect the horizontal axis
-  if ~exist( 'psi_planet', 'var' )
-  psi_plnt = 0 ; % degrees
-  else
-  psi_plnt = floor( psi_planet ) ;
-  end
-
-% Replace by a file in FITS format with an Nx x Nx array if you want a specific pupil  
-  if ~exist( 'pupil_file', 'var' )
-  ppl_fl = './in/pupil_D1Kpix_2048.fits' ;
-  else
-  ppl_fl = pupil_file ;
-  end
-
-  if strcmp( ppl_fl, '0' )
-  ppl_fl = '' ;
-  end
+% Main parameters
+Nx = opt.Nx_pupil_pix ;
+dlt_lmbd = opt.delta_lambda_nm ;
+r_src = opt.r_source_mas ;
+psi_src = opt.psi_source_deg ;
+ppl_fl = opt.pupil_file ;
 
 % Settings for saving fields
 useSave = opt.save_all ; % 1 save, 0 don't
-  if isfield( opt, 'save_path' )
-  savePath = opt.save_path ;
-  else
-  savePath = './out/';
-  end
-
+savePath = opt.save_path ;
   if ~isdir( savePath ), system( [ 'mkdir -p ' savePath ] ) ; end
-saveFilename = sprintf( 'starshade_out_Nx_%i_pix_dl_%inm_dr_%i_mas_psi_%i_deg', Nx, dlt_lmbd, r_plnt, psi_plnt ) ;
-  if numel( ppl_fl ) == 0
-  saveFilename = sprintf( '%s_ideal', saveFilename ) ;
-  end
-
-% Directory where to store the figures
-useSaveImg = 1; % 1 save, 0 don't
-savePathImg = './fig/';
-  if ~isdir( savePathImg ), system( [ 'mkdir -p ' savePathImg ] ) ; end
-
+saveFilename = sprintf( 'starshade_out_Nx_%i_pix_dl_%inm_dr_%i_mas_psi_%i_deg', Nx, dlt_lmbd, r_src, psi_src ) ;
+  if strcmp( ppl_fl, '0' ) == 0, saveFilename = sprintf( '%s_ideal', saveFilename ) ; end
 
 %---------------------------
 % Step 1: Load up starshade
 %---------------------------
-  if isfield( opt, 'developer' )
+  if ( opt.developer )
   units_image
   else
   units
@@ -86,9 +56,9 @@ disp( sprintf( 'Considering %i wavelengths', numel( lambdaIn ) ) )
 imagePlaneDiamInMAS = 2000; % Diameter of image plane in milliarcseconds
 Nxi = 400; % Number of pixels across image plane 
 % Build/load
-if isempty( ppl_fl )
+if strcmp( ppl_fl, '0' )
     secondarySize = 0; % If you're fine with a generic circular pupil with a secondary (but no struts), set this to the fraction of the radius the secondard covers (e.g. 0.2)
-    if isfield( opt, 'developer' )
+    if ( opt.developer )
     pupil = makePupil_image( Nx, Nx, 1, secondarySize, 0, 0 ) ;
     else
     pupil = makePupil(Nx, Nx, 1, secondarySize, 0, 0);
@@ -130,13 +100,13 @@ deltaY = 0;
 % Build edge; this function is overkill for an unaberrated edge but will do
 % the job
 tic
-  if isfield( opt, 'developer' )
+  if ( opt.developer )
   vecPetalArray = createErrorProfileV1_image(r, Profile, occulterDiameter, petalLength, numPetals, {});
   else
   vecPetalArray = createErrorProfileV1(r, Profile, occulterDiameter, petalLength, numPetals, {});
   end
 t = toc ;
-  if isfield( opt, 'developer' )
+  if ( opt.developer )
   createErr_lbl = 'createErrorProfileV1_image' ;
   else
   createErr_lbl = 'createErrorProfileV1' ;
@@ -167,13 +137,13 @@ disp( sprintf( 'xyzVals took %3.2f seconds', t ) )
 
 % Propagate to telescope aperture plane with line integral
 tic
-  if isfield( opt, 'developer' )
-  UTotL = bdwf_image(xVals, yVals, zVals, Z, lambdaIn, telescopeDiameter/Nx, Nx, r_plnt * mas, psi_plnt * degree, deltaX, deltaY);
+  if ( opt.developer )
+  UTotL = bdwf_image(xVals, yVals, zVals, Z, lambdaIn, telescopeDiameter/Nx, Nx, r_src * mas, psi_src * degree, deltaX, deltaY);
   else
-  UTotL = bdwf(xVals, yVals, zVals, Z, lambdaIn, telescopeDiameter/Nx, Nx, r_plnt * mas, psi_plnt * degree, deltaX, deltaY);
+  UTotL = bdwf(xVals, yVals, zVals, Z, lambdaIn, telescopeDiameter/Nx, Nx, r_src * mas, psi_src * degree, deltaX, deltaY);
   end
 t = toc;
-  if isfield( opt, 'developer' )
+  if ( opt.developer )
   bdwf_lbl = 'bdwf_image' ;
   else
   bdwf_lbl = 'bdwf' ;
@@ -182,7 +152,7 @@ t = toc;
 disp( sprintf('%s took %3.2f seconds, %3.2f per wavelength bin', bdwf_lbl, t, t / n_lmbd ) )
 
 tic
-  if isfield( opt, 'developer' )
+  if ( opt.developer )
   [ ~, ~, impeak ] = mft_image( 1, Nxi, pupil ) ; % Use 1 L/D square
   else
   [ ~, ~, impeak ] = mft( 1, Nxi, pupil ) ; % Use 1 L/D square
@@ -200,7 +170,7 @@ for ll = 1:length(lambdaIn)
     imagePlaneDiameterInMAS = Nxi*masPerPixel;
     imagePlaneDiameterInLambdaOverD = imagePlaneDiameterInMAS*mas*D/lambda;
    
-      if isfield( opt, 'developer' ) 
+      if ( opt.developer ) 
       [Xout, Yout, imagePlane] = mft_image(imagePlaneDiameterInLambdaOverD, Nxi, UTot.*pupil);
       else
       [Xout, Yout, imagePlane] = mft(imagePlaneDiameterInLambdaOverD, Nxi, UTot.*pupil);
@@ -213,7 +183,7 @@ t = toc ;
 disp( sprintf( 'efDefectImg took %3.2f seconds', t ) )
 
 if useSave == 1
-    save([savePath saveFilename '.mat' ], 'efDefectImg', 'lambdaIn', 'vecPetalArray')
+    save([savePath '/' saveFilename '.mat' ], 'efDefectImg', 'lambdaIn', 'vecPetalArray')
 end
 
 dbstop if error

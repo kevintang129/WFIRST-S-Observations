@@ -1,54 +1,32 @@
-function plotStarshadeImage( Nx, delta_lambda, r_planet, psi_planet, pupil_file, x_plt, y_plt )
-
+function plotStarshadeImage( opt, x_plt, y_plt )
 % Function to plot the results of makeStarshadeImage
-% Sergi Hildebrandt 04/28/17
+% History:
+% 04/28/17: created, Sergi Hildebrandt (JPL/Caltech)
+% 05/12/17: added interface with opt, Sergi Hildebrandt (JPL/Caltech)
 
-  if isfield( opt, 'developer' )
-  units_image
-  else
-  units
-  end
+% Get default options (look inside the function for specific definitions)
+opt = get_default_options( opt ) ;
+% Developer version? Here is just this
+  if ( opt.developer ), units_image ; else, units ; end
 
-% Size of the pupil data in pixels (square)
-  if ~exist( 'Nx', 'var' )
-  Nx = 128 ;
-  end
-
-% Step of wavelength to consider
-  if ~exist( 'delta_lambda', 'var' )
-  dlt_lmbd = 50 ; % nm
-  else
-  dlt_lmbd = delta_lambda ;
-  end
-
-% Separation of the planet from the center of the pointing
-% This is temporary, meant for tests only
-  if ~exist( 'r_planet' )
-  r_plnt = 0 ; % mas
-  else
-  r_plnt = floor( r_planet ) ;
-  end
-
-% Angle of the planet with respect the horizontal axis
-  if ~exist( 'psi_planet', 'var' )
-  psi_plnt = 0 ; % degrees
-  else
-  psi_plnt = floor( psi_planet ) ;
-  end
-
-savePath = './out/' ;
-saveFilename = sprintf( 'starshade_out_Nx_%i_pix_dl_%inm_dr_%i_mas_psi_%i_deg', Nx, dlt_lmbd, r_plnt, psi_plnt ) ;
-  if ~exist( 'pupil_file', 'var' )
-  pupil_file = 10 ; % any vallue different than zero
-  end
-  if pupil_file == 0
+% Main parameters
+Nx = opt.Nx_pupil_pix ;
+dlt_lmbd = opt.delta_lambda_nm ;
+r_src = opt.r_source_mas ;
+psi_src = opt.psi_source_deg ;
+savePath = opt.save_path ;
+  if ~isdir( savePath ), system( sprintf( 'mkdir -p %s', savePath ) ) ; end
+% Saving naming
+saveFilename = sprintf( 'starshade_out_Nx_%i_pix_dl_%inm_dr_%i_mas_psi_%i_deg', Nx, dlt_lmbd, r_src, psi_src ) ;
+% Case of an ideal pupil
+  if strcmp( opt.pupil_file, '0' )
   saveFilename = sprintf( '%s_ideal', saveFilename ) ;
   end
-savePathImg = './fig' ;
+savePathImg = opt.save_fig ;
   if ~isdir( savePathImg ), system( sprintf( 'mkdir -p %s', savePathImg ) ) ; end
 
 % loading the stored data
-load( sprintf( '%s%s.mat', savePath, saveFilename ) ) ;
+load( sprintf( '%s/%s.mat', savePath, saveFilename ) ) ;
 
   set(0,'defaultlinelinewidth',1.0);
   set(0,'DefaultAxesFontSize',14);
@@ -161,6 +139,7 @@ load( sprintf( '%s%s.mat', savePath, saveFilename ) ) ;
     tmp = squeeze( real( efDefectImg( :, :, 2 ) ) ) ;
     mx_plt = max( tmp( : ) ) ;
     q_mx = find( tmp == mx_plt ) ; % Avoiding the first image that has some aliasing
+    q_mx = q_mx( 1 ) ;
     x_plt = floor( q_mx / sz_img( 1 ) ) + 1 ;
     end
     if ~exist( 'y_plt', 'var' )
@@ -256,7 +235,7 @@ load( sprintf( '%s%s.mat', savePath, saveFilename ) ) ;
   disp( sprintf( '(plotStarshadeImage) Images stored in %s', savePathImg ) ) ;
 
   % Magnitude with shifted pixels
-  close all ; setwinsize(gcf,900,250)
+  close all ; setwinsize(gcf,900,350)
   plt_dt_tmp = abs( plt_dt_shft ).^2 ;
   h_plt( 1 ) = plot( lambdaIn/nm, plt_dt_tmp, 'k+-' ) ;
   grid

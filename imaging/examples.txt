@@ -2,56 +2,74 @@
 addpath( genpath( '/Users/srhildeb/caltech/mat/' ) ) ;
 
 % DEVELOPER EXAMPLE:
-opt.developer = 1 ; opt.save_path = 'out_dev' ; opt.save_all = 1 ; Nx = 16 ; makeStarshadeImage( Nx, 1000, 120, 0, opt ) ;
+clear ; opt.developer = 1 ; opt.save_path = 'out_dev' ; opt.save_all = 1 ; opt.Nx_pupil_pix = 64 ; opt.delta_lambda_nm = 1000 ; 
+opt.r_source_mas = 120 ; opt.psi_source_deg = 0 ; makeStarshadeImage( opt ) ;
 
 
 %%%%%%%%%%%%%%%%%%%%%
 %   CALCULATIONS    %
 %%%%%%%%%%%%%%%%%%%%%
 % Minimum set of options
+clear
 opt.save_all = 1 ;
 % Studying the effect of increasing the resolution of the pupil (perfect pupil)
-makeStarshadeImage( 64, 100, 0, 0, opt, '0' ) ;
-makeStarshadeImage( 128, 100, 0, 0, opt, '0' ) ;
+opt.delta_lambda_nm = 100 ; opt.pupil_file = '0' ; opt.Nx_pupil_pix = 64 ; 
+makeStarshadeImage( opt ) ;
+opt.Nx_pupil_pix = 128 ;
+makeStarshadeImage( opt ) ;
 
 % Studying the effect of increasing the resolution of the pupil (WFIRST pupil)
-makeStarshadeImage( 64, 100, 0, 0, opt ) ;
-makeStarshadeImage( 128, 100, 0, 0, opt ) ;
+rmfield( opt, 'pupil_file' ) ;
+opt.Nx_pupil_pix = 64 ;
+makeStarshadeImage( opt ) ;
+opt.Nx_pupil_pix = 128 ;
+makeStarshadeImage( opt ) ;
 
 % Studying the possibility of interpolation
-%% Check 64 is fine from previous results
+%% 64 is fine from previous results
 %% For the star:
-Nx = 64 ;
-% Minimum set of options
-opt.save_all = 1 ;
-makeStarshadeImage( Nx, 25, 0, 0, opt ) ;
+opt.Nx_pupil_pix = 64 ;
+opt.delta_lambda_nm = 25 ;
+makeStarshadeImage( opt ) ;
 %% For the planet at 20 mas
-makeStarshadeImage( Nx, 25, 20, 0, opt ) ;
+opt.r_source_mas = 20 ;
+makeStarshadeImage( opt ) ;
 %% For the planet at 60 mas
-makeStarshadeImage( Nx, 25, 60, 0, opt ) ;
+opt.r_source_mas = 60 ;
+makeStarshadeImage( opt ) ;
 %% For the planet at 120 mas
-makeStarshadeImage( Nx, 25, 120, 0, opt ) ;
+opt.r_source_mas = 120 ;
+makeStarshadeImage( opt ) ;
 
 %%%%%%%%%%%%%%
 %   PLOTS    %
 %%%%%%%%%%%%%%
 
 % Studying the effect of increasing the resolution of the pupil (perfect pupil)
-plotStarshadeImage( 64, 100, 0, 0, 0 )
-plotStarshadeImage( 128, 100, 0, 0, 0 )
+clear
+opt.Nx_pupil_pix = 64 ; opt.delta_lambda_nm = 100 ; opt.pupil_file = '0' ;
+plotStarshadeImage( opt )
+opt.Nx_pupil_pix = 128 ;
+plotStarshadeImage( opt )
 
 % Studying the effect of increasing the resolution of the pupil (WFIRST pupil)
-plotStarshadeImage( 64, 100, 0, 0 )
-plotStarshadeImage( 128, 100, 0, 0 )
+rmfield( opt, 'pupil_file' ) ;
+opt.Nx_pupil_pix = 64 ;
+plotStarshadeImage( opt )
+opt.Nx_pupil_pix = 128 ;
+plotStarshadeImage( opt )
 
-Nx = 64 ;
-plotStarshadeImage( Nx, 25, 0, 0 )
+opt.Nx_pupil_pix = 64 ; opt.delta_lambda_nm = 25 ;
+plotStarshadeImage( opt )
 %% For the planet at 20 mas
-plotStarshadeImage( Nx, 25, 20, 0 )
+opt.r_source_mas = 20 ;
+plotStarshadeImage( opt )
 %% For the planet at 60 mas
-plotStarshadeImage( Nx, 25, 60, 0 )
+opt.r_source_mas = 60 ;
+plotStarshadeImage( opt )
 %% For the planet at 120 mas
-plotStarshadeImage( Nx, 25, 120, 0 )
+opt.r_source_mas = 120 ;
+plotStarshadeImage( opt )
 
 %%%%%%%%%%%%%%%%%%%%
 %   SIMULATIONS    %

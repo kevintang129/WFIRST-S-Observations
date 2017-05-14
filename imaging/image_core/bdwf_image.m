@@ -132,8 +132,8 @@ else
 tic
 Nx_0 = Nx ;
 Ny_0 = Ny ;
-Nx = 16 ;
-Ny = 16 ;
+Nx = 32 ;
+Ny = 32 ;
 sprintf( 'Nx, Ny=%i,%i changed to %i,%i', Nx_0, Ny_0, Nx, Ny )
 
         % Off-axis source present but in-plane
@@ -143,35 +143,37 @@ sprintf( 'Nx, Ny=%i,%i changed to %i,%i', Nx_0, Ny_0, Nx, Ny )
             for kk = 1:Ny
                 dx = (xm - xO(jj));
                 dy = (ym - yO(kk));
-                
+% 6% running time for f, g and h                
                 f = s1*Z + c1*c2*dx + c1*s2*dy;
                 g =      -    s2*dx +    c2*dy;
                 h = c1*Z - s1*c2*dx - s1*s2*dy;
                 
+% 3% running time spent here:
                 fSquarePlusGSquare = f.*f + g.*g;
-                sHatCrossPDotLdl = xl.*(s2*s1*Z + c1*dy) + yl.*(-c2*s1*Z - c1*dx);
+%                sHatCrossPDotLdl = xl.*(s2*s1*Z + c1*dy) + yl.*(-c2*s1*Z - c1*dx);
+% SRH
+% 7% running time spent with tmp_1 and tmp_2
                 tmp_1 = fSquarePlusGSquare./h ;
-                tmp_2 = sHatCrossPDotLdl ./ fSquarePlusGSquare ;
+                tmp_2 = ( xl.*(s2*s1*Z + c1*dy) + yl.*(-c2*s1*Z - c1*dx) ) ./ fSquarePlusGSquare ;
                 for qq = 1:nLambda
 %                     E(jj, kk, qq) = sum(exp(1i*pil(qq)*(fSquarePlusGSquare./h))./(fSquarePlusGSquare).*sHatCrossPDotLdl);
 % SRH
-                    E(jj, kk, qq) = sum( exp( 1i*tmp_1*pil(1) ) .* tmp_2 ) ; %sum(exp(1i*pil(qq)*tmp_1).*tmp_2);
+% 32% of the running time spent here
+                    E(jj, kk, qq) = sum(exp(1i*pil(qq)*tmp_1).*tmp_2) ; 
                 end
-                
-%                wind(jj, kk) = polywindFlag_image(vt, [(xO(jj) - Z*s1*c2) (yO(kk) - Z*s1*s2)], inOccFlag);
-%                tilt(jj, kk) = xO(jj)*c2 + yO(kk)*s2;
+% 48% running time spent here                
+                wind(jj, kk) = polywindFlag_image(vt, [(xO(jj) - Z*s1*c2) (yO(kk) - Z*s1*s2)], inOccFlag);
+% Negligible time spent here
+                tilt(jj, kk) = xO(jj)*c2 + yO(kk)*s2;
             end
         end
 toc        
-tic
+%  Negligible time spent here
         for qq = 1:nLambda
             eikz = exp(1i*p2l(qq)*Z*c1)*exp(1i*p2l(qq)*s1*tilt);
             E(:,:,qq) = eikz./(2*pi).*E(:,:,qq);
             E(:,:,qq) = eikz.*(wind == 0) - E(:,:,qq);
         end
-toc
-dbstop if error
-make_an_error
     else
         % On-axis source & flat occulter
 % SRH:
