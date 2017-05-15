@@ -1,6 +1,6 @@
 % NB: include imagescnan in the distribution
 
-function starshade_simulation( opt )
+function starshade_simulation( opt_in )
 
 % Simple interface to test some simulation setup
 % opt has the ingredients for the simulation
@@ -9,12 +9,12 @@ function starshade_simulation( opt )
 % opt.r_planet is an array of planet orbital radius in mas
 % opt.phase_planet is an array with the orbital phases of the planets in degrees
 % opt.contrast_planet is an array of contrast values for each planet
-% opt.save sets whether the final simulation will be stored (1/0=yes/no)
-% opt.save_all sets whether each planet simulation will be stored (1/0=yes/no)
-% opt.save_fig sets whether to produce/store a figure of the simulation (1/0=yes/no) 
-% opt.save_fig_all sets whether to produce/stroe a figure of each element of the simulation before coadding them (1/0=yes/no)
 % History:
-% Sergi R. Hildebrandt 05/01/17: first version
+% 05/01/17: first version. Sergi Hildebrandt (JPL/Caltech)
+% 05/14/17: adapated to use opt. Sergi Hildebrandt (JPL/Caltech)
+
+% get default values for the options
+opt = get_default_options( opt_in ) ;
 
   if isfield( opt, 'developer' )
   units_image
@@ -22,30 +22,33 @@ function starshade_simulation( opt )
   units
   end
 
-n_plnt = numel( opt.r_planet ) 
+n_plnt = numel( opt.r_planet_mas ) ;
+disp( sprintf( '(starshade_simulation) Simulating a star and %i planets', n_plnt ) )
 
 % Simulation
-%% Star
-[ efDefectImg_str lambdaIn  vecPetalArray ] = makeStarshadeImage( 64, 500, opt.r_star, opt.psi_star, opt ) ;
+%% 1) Star
+opt_str = opt ;
+opt_str.r_source_mas = opt.r_star_mas ;
+opt_str.psi_source_deg = opt.psi_star_deg ;
+[ efDefectImg_str lambdaIn  vecPetalArray ] = makeStarshadeImage( opt_str ) ;
 IntDefectImg_sim = abs( efDefectImg_str ).^2 ; % This is correct, it does compute the intensity for each wavelength
-dbstop if error
-%make_an_error
-%% Accumulating the results for each planet
+
+%% 2) Accumulating the results for each planet
+opt_plnt = opt ;
   for i_plnt = 1 : n_plnt
-  clear opt_tmp 
-  opt_tmp.r_planet = opt.r_planet( i_plnt ) ;
-  [ efDefectImg_tmp ] = makeStarshadeImage( 64, 500, opt.r_planet( i_plnt ), opt.phase_planet( i_plnt ), opt ) ;
+  opt_plnt.r_source_mas = opt.r_planet_mas( i_plnt ) ;
+  opt_plnt.psi_source_deg = opt.phase_planet_deg( i_plnt ) ;
+  [ efDefectImg_tmp ] = makeStarshadeImage( opt_plnt ) ;
   IntDefectImg_sim = IntDefectImg_sim + opt.contrast_planet( i_plnt ) * abs( efDefectImg_tmp ).^2 ;
   end
 
-% Saving the simulation
-savePath = './out/';
 % Temporary ... FIXME
-saveFilename = 'starshade_star_planet_sim.mat' ; 
-if opt.save == 1
-    save([savePath saveFilename '.mat' ], 'IntDefectImg_sim', 'lambdaIn', 'vecPetalArray')
-end
-
+saveFilename = 'starshade_star_planet_sim' ; 
+  if opt.save == 1
+  pth_fl_sv = [ opt.save_path '/' saveFilename '.mat' ] ;
+  save( pth_fl_sv, 'IntDefectImg_sim', 'lambdaIn', 'vecPetalArray')
+  disp( sprintf( '(starshade_simulation) Output array of the simulation stored in: %s', pth_sv_fl ) )
+  end
 
 % A figure
 % Non-linear transformation of the original image
@@ -62,7 +65,6 @@ imagescnan( nw_img, [ log10( min( opt.contrast_planet ) ) - 3, log10( max( opt.c
 colorbar
 suptitle( sprintf( 'Starshade simulation: Intensity at %3.0f nm', lambdaIn( 2 ) / nm ) )
 title( sprintf( 'Contrasts: %1.1e, %1.1e, %1.1e, %1.1e', opt.contrast_planet( 1 ), opt.contrast_planet( 2 ), opt.contrast_planet( 3 ), opt.contrast_planet( 4 ) ), 'FontSize', 16 )  
-
 
 dbstop if error
 make_an_error

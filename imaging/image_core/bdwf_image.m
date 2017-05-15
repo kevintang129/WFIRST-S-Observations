@@ -130,11 +130,12 @@ else
     % Entirely in-plane
     if flagP1
 tic
-Nx_0 = Nx ;
-Ny_0 = Ny ;
-Nx = 32 ;
-Ny = 32 ;
-sprintf( 'Nx, Ny=%i,%i changed to %i,%i', Nx_0, Ny_0, Nx, Ny )
+% SRH
+%Nx_0 = Nx ;
+%Ny_0 = Ny ;
+%Nx = 32 ;
+%Ny = 32 ;
+%sprintf( 'Nx, Ny=%i,%i changed to %i,%i', Nx_0, Ny_0, Nx, Ny )
 
         % Off-axis source present but in-plane
         tilt = zeros(nO, nO);
@@ -178,11 +179,11 @@ toc
         % On-axis source & flat occulter
 % SRH:
 tic
-Nx_0 = Nx ;
-Ny_0 = Ny ;
-Nx = 4 ; 
-Ny = 4 ;
-sprintf( 'Nx, Ny=%i,%i changed to %i,%i', Nx_0, Ny_0, Nx, Ny ) 
+%Nx_0 = Nx ;
+%Ny_0 = Ny ;
+%Nx = 4 ; 
+%Ny = 4 ;
+%sprintf( 'Nx, Ny=%i,%i changed to %i,%i', Nx_0, Ny_0, Nx, Ny ) 
         for jj = 1:Nx
             for kk = 1:Ny
                 fSquarePlusGSquare = (xm - xO(jj)).^2 + (ym - yO(kk)).^2;
@@ -191,7 +192,7 @@ sprintf( 'Nx, Ny=%i,%i changed to %i,%i', Nx_0, Ny_0, Nx, Ny )
                 tmp = sHatCrossPDotLdl ./ fSquarePlusGSquare ;                
                 for qq = 1:nLambda
 % SRH
-                    E2(jj,kk,qq) = sum(exp(1i*fSquarePlusGSquare*pilz(qq)).*tmp);
+                    E(jj,kk,qq) = sum(exp(1i*fSquarePlusGSquare*pilz(qq)).*tmp);
 %                    E(jj,kk,qq) = sum(exp(1i*pilz(qq)*(fSquarePlusGSquare))./(fSquarePlusGSquare).*sHatCrossPDotLdl);
 %                    D(jj,kk,qq) = E2(jj,kk,qq) - E(jj,kk,qq) ;
                 end
@@ -200,7 +201,7 @@ sprintf( 'Nx, Ny=%i,%i changed to %i,%i', Nx_0, Ny_0, Nx, Ny )
             end
         end
 toc
-dbstop if error
+%dbstop if error
 %make_an_error
         
         for qq = 1:nLambda

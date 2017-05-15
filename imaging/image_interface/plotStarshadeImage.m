@@ -1,11 +1,11 @@
-function plotStarshadeImage( opt, x_plt, y_plt )
+function plotStarshadeImage( opt_in, x_plt, y_plt )
 % Function to plot the results of makeStarshadeImage
 % History:
 % 04/28/17: created, Sergi Hildebrandt (JPL/Caltech)
 % 05/12/17: added interface with opt, Sergi Hildebrandt (JPL/Caltech)
 
 % Get default options (look inside the function for specific definitions)
-opt = get_default_options( opt ) ;
+opt = get_default_options( opt_in ) ;
 % Developer version? Here is just this
   if ( opt.developer ), units_image ; else, units ; end
 
@@ -16,13 +16,13 @@ r_src = opt.r_source_mas ;
 psi_src = opt.psi_source_deg ;
 savePath = opt.save_path ;
   if ~isdir( savePath ), system( sprintf( 'mkdir -p %s', savePath ) ) ; end
-% Saving naming
-saveFilename = sprintf( 'starshade_out_Nx_%i_pix_dl_%inm_dr_%i_mas_psi_%i_deg', Nx, dlt_lmbd, r_src, psi_src ) ;
+% Saved files naming
+saveFilename = sprintf( 'starshade_out_Nx_%i_pix_dl_%inm_dr_%3.1f_mas_psi_%3.1f_deg', Nx, dlt_lmbd, r_src, psi_src ) ;
 % Case of an ideal pupil
   if strcmp( opt.pupil_file, '0' )
   saveFilename = sprintf( '%s_ideal', saveFilename ) ;
   end
-savePathImg = opt.save_fig ;
+savePathImg = opt.save_path_fig ;
   if ~isdir( savePathImg ), system( sprintf( 'mkdir -p %s', savePathImg ) ) ; end
 
 % loading the stored data

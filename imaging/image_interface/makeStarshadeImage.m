@@ -1,4 +1,4 @@
-function [ efDefectImg, lambdaIn, vecPetalArray ] = makeStarshadeImage( opt )
+function [ efDefectImg, lambdaIn, vecPetalArray ] = makeStarshadeImage( opt_in )
 % makeStarshadeImage
 % A sample program which creates a locus of edge point from an apodization
 % function and propagates the resulting field to a telescope focal plane.
@@ -10,13 +10,13 @@ function [ efDefectImg, lambdaIn, vecPetalArray ] = makeStarshadeImage( opt )
 % 1) Include RGB colors
 
 % Check some options are being passed
-  if ~exist( 'opt', 'var' )
-  disp( '(makeStarshadeImage) Provide some options: opt.x=y ; makeStarshadeImage( opt ) ;' )
+  if ~exist( 'opt_in', 'var' )
+  disp( '(makeStarshadeImage) Provide some options: opt.x=y ; makeStarshadeImage( opt ) ; returning ...' )
   return
   end
 
 % Get default options (look inside the function for specific definitions)
-opt = get_default_options( opt ) ;
+opt = get_default_options( opt_in ) ;
 
 % Developer version? Here is just this
   if ( opt.developer ), units_image ; else, units ; end
@@ -29,12 +29,11 @@ psi_src = opt.psi_source_deg ;
 ppl_fl = opt.pupil_file ;
 
 % Settings for saving fields
-useSave = opt.save_all ; % 1 save, 0 don't
+useSave = opt.save ; % 1 save, 0 don't
 savePath = opt.save_path ;
   if ~isdir( savePath ), system( [ 'mkdir -p ' savePath ] ) ; end
-saveFilename = sprintf( 'starshade_out_Nx_%i_pix_dl_%inm_dr_%i_mas_psi_%i_deg', Nx, dlt_lmbd, r_src, psi_src ) ;
-  if strcmp( ppl_fl, '0' ) == 0, saveFilename = sprintf( '%s_ideal', saveFilename ) ; end
-
+saveFilename = sprintf( 'starshade_out_Nx_%i_pix_dl_%inm_dr_%3.1f_mas_psi_%3.1f_deg', Nx, dlt_lmbd, r_src, psi_src ) ;
+  if strcmp( ppl_fl, '0' ) == 1, saveFilename = sprintf( '%s_ideal', saveFilename ) ; end
 %---------------------------
 % Step 1: Load up starshade
 %---------------------------

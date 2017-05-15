@@ -2,7 +2,7 @@
 addpath( genpath( '/Users/srhildeb/caltech/mat/' ) ) ;
 
 % DEVELOPER EXAMPLE:
-clear ; opt.developer = 1 ; opt.save_path = 'out_dev' ; opt.save_all = 1 ; opt.Nx_pupil_pix = 64 ; opt.delta_lambda_nm = 1000 ; 
+clear ; opt.developer = 1 ; opt.save_path = 'out_dev' ; opt.save_all = 1 ; opt.delta_lambda_nm = 1000 ; 
 opt.r_source_mas = 120 ; opt.psi_source_deg = 0 ; makeStarshadeImage( opt ) ;
 
 
@@ -13,7 +13,7 @@ opt.r_source_mas = 120 ; opt.psi_source_deg = 0 ; makeStarshadeImage( opt ) ;
 clear
 opt.save_all = 1 ;
 % Studying the effect of increasing the resolution of the pupil (perfect pupil)
-opt.delta_lambda_nm = 100 ; opt.pupil_file = '0' ; opt.Nx_pupil_pix = 64 ; 
+opt.delta_lambda_nm = 100 ; opt.pupil_file = '0' ; 
 makeStarshadeImage( opt ) ;
 opt.Nx_pupil_pix = 128 ;
 makeStarshadeImage( opt ) ;
@@ -47,7 +47,7 @@ makeStarshadeImage( opt ) ;
 
 % Studying the effect of increasing the resolution of the pupil (perfect pupil)
 clear
-opt.Nx_pupil_pix = 64 ; opt.delta_lambda_nm = 100 ; opt.pupil_file = '0' ;
+opt.delta_lambda_nm = 100 ; opt.pupil_file = '0' ;
 plotStarshadeImage( opt )
 opt.Nx_pupil_pix = 128 ;
 plotStarshadeImage( opt )
@@ -71,34 +71,42 @@ plotStarshadeImage( opt )
 opt.r_source_mas = 120 ;
 plotStarshadeImage( opt )
 
-%%%%%%%%%%%%%%%%%%%%
-%   SIMULATIONS    %
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   FIRST SIMULATIONS    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Simulation of some star & planets configuration
-opt.r_star = 0 ; % mas
-opt.psi_star = 0 ; % degrees
-opt.r_planet = [ 160, 160, 160, 160 ] ; % mas
-opt.phase_planet = [ 0, 90, 180, 270 ] ; % degrees
-opt.contrast_planet = [ 1e-9, 5e-10, 1e-10, 5e-11 ] ; % relative to the star
-opt.save = 1 ;
-opt.save_all = 0 ;
-opt.save_fig = 1 ;
-opt.save_fig_all = 0 ;
+clear
+opt.r_star_mas = 0 ; % mas
+opt.psi_star_deg = 0 ; % degrees
+opt.r_planet_mas = [ 70, 120, 200, 300 ] ; % mas
+opt.phase_planet_deg = [ 0, 120, 230, 270 ] ; % degrees
+opt.contrast_planet = 1e-9 * ( 70 ./ opt.r_planet_mas ).^2 ; % relative to the star
+opt.save_all = 1 ;
+opt.delta_lambda_nm = 500 ;
 starshade_simulation( opt ) ;
 
+%%%%%%%%%%%%%%%%%%%%
+%   INTERPOLATION  %
+%%%%%%%%%%%%%%%%%%%%
 
-% Simulation of some star & planets configuration
-opt.r_star = 0 ; % mas
-opt.psi_star = 0 ; % degrees
-opt.r_planet = [ 70, 120, 200, 300 ] ; % mas
-opt.phase_planet = [ 0, 120, 230, 270 ] ; % degrees
-opt.contrast_planet = 1e-9 * ( 70 ./ opt.r_planet ).^2 ; % relative to the star
+clear
+opt.developer = 1 ;
+opt.create_reference = 1 ;
+opt.star = 1 ;
+opt.delta_lambda_nm = 100 ;
 opt.save = 1 ;
-opt.save_all = 0 ;
-opt.save_fig = 1 ;
-opt.save_fig_all = 0 ;
-starshade_simulation( opt ) ;
+starshade_interpolation( opt )
+
+clear
+opt.developer = 1 ;
+opt.create_reference = 1 ;
+opt.planet = 1 ;
+opt.delta_lambda_nm = 100 ;
+opt.save = 1 ;
+starshade_interpolation( opt )
+
+
 
 
 
