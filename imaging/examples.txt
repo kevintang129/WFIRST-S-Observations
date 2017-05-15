@@ -92,6 +92,7 @@ starshade_simulation( opt ) ;
 
 clear
 opt.developer = 1 ;
+opt.redo = 0 ;
 opt.create_reference = 1 ;
 opt.star = 1 ;
 opt.delta_lambda_nm = 100 ;
@@ -100,6 +101,7 @@ starshade_interpolation( opt )
 
 clear
 opt.developer = 1 ;
+opt.redo = 0 ;
 opt.create_reference = 1 ;
 opt.planet = 1 ;
 opt.delta_lambda_nm = 100 ;

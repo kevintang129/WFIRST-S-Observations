@@ -47,7 +47,7 @@ saveFilename = 'starshade_star_planet_sim' ;
   if opt.save == 1
   pth_fl_sv = [ opt.save_path '/' saveFilename '.mat' ] ;
   save( pth_fl_sv, 'IntDefectImg_sim', 'lambdaIn', 'vecPetalArray')
-  disp( sprintf( '(starshade_simulation) Output array of the simulation stored in: %s', pth_sv_fl ) )
+  disp( sprintf( '(starshade_simulation) Output array of the simulation stored in: %s', pth_fl_sv ) )
   end
 
 % A figure

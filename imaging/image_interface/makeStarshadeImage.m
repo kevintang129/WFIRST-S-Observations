@@ -34,6 +34,18 @@ savePath = opt.save_path ;
   if ~isdir( savePath ), system( [ 'mkdir -p ' savePath ] ) ; end
 saveFilename = sprintf( 'starshade_out_Nx_%i_pix_dl_%inm_dr_%3.1f_mas_psi_%3.1f_deg', Nx, dlt_lmbd, r_src, psi_src ) ;
   if strcmp( ppl_fl, '0' ) == 1, saveFilename = sprintf( '%s_ideal', saveFilename ) ; end
+
+% Skipping the simulation if it is saved and does not need to be re-done
+if useSave == 1
+  if ( ~opt.redo ) && ( exist( [ savePath '/' saveFilename '.mat' ] ) == 2 )
+  disp( sprintf( '(makeStarshadeImage) Simulation %s exists. Skipping.', saveFilename ) )
+  return
+  end
+  if ( opt.redo ) && ( exist( [ savePath '/' saveFilename '.mat' ] ) == 2 )
+  disp( sprintf( '(makeStarshadeImage) Simulation %s exists, but re-doing it.', saveFilename ) )
+  end
+end
+
 %---------------------------
 % Step 1: Load up starshade
 %---------------------------
@@ -44,9 +56,10 @@ saveFilename = sprintf( 'starshade_out_Nx_%i_pix_dl_%inm_dr_%3.1f_mas_psi_%3.1f_
   end
 
 % Load occulter definition (change this for your file structure)
-occulterName = 'NW2';
 folderpath = './in/' ; %'../Occulter design/Profiles/';
-load([folderpath occulterName '.mat']); % Load up the comparison occulter
+occulterName = [ folderpath opt.occulter_name '.mat' ] ;
+load( occulterName ); % Load up the comparison occulter
+disp( sprintf( '(makeStarshadeImage) Occulter name: %s', occulterName ) )
 
 % Simulation parameters
 lambdaIn = 300 * nm + dlt_lmbd * nm * ( 0 : 1 : 700 / dlt_lmbd ) ;

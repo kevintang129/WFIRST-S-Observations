@@ -9,6 +9,16 @@ function opt = get_default_options( opt )
   opt.developer = 0 ;
   end
 
+% Switch to control some work that needs to be re-done or may be skipped if it already exists
+  if ~isfield( opt, 'redo' )
+  opt.redo = 1 ;
+  end
+
+% Occulter Name
+  if ~isfield( opt, 'occulter_name' )
+  opt.occulter_name = 'NI2' ;
+  end
+
 % Size of the pupil data in pixels (square)
   if ~isfield( opt, 'Nx_pupil_pix' )
   opt.Nx_pupil_pix = 64 ;
