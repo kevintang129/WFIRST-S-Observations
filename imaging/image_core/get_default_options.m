@@ -41,9 +41,11 @@ function opt = get_default_options( opt )
 % Checks of consistency
   if isfield( opt, 'r_source_mas' ) && ~isfield( opt, 'psi_source_deg' )
   disp( '(get_default_options) r_source_mas set, but psi_source_deg not. Inconsistent. Returning.' )
+  return
   end
   if isfield( opt, 'psi_source_deg' ) && ~isfield( opt, 'r_source_mas' )
   disp( '(get_default_options) psi_source_deg set, but r_source_mas not. Inconsistent. Returning.' )
+  return
   end
 
 % Separation of the source from the center of the pointing
@@ -56,6 +58,16 @@ function opt = get_default_options( opt )
   opt.psi_source_deg = 0 ; % degrees
   end
 
+% Consistency check
+  if isfield( opt, 'y_source_mas' ) && ~isfield( opt, 'x_source_mas' )
+  disp( '(get_default_options) If opt.y_source_mas is set, opt.x_source_mas must also be set. Returning.' )
+  return
+  end
+  if isfield( opt, 'x_source_mas' ) && ~isfield( opt, 'y_source_mas' )
+  disp( '(get_default_options) If opt.x_source_mas is set, opt.y_source_mas must also be set. Returning.' )
+  return
+  end
+
   if isfield( opt, 'x_source_mas' )
   % Consistency check
     if ~isfield( opt, 'y_source_mas' )
@@ -63,28 +75,30 @@ function opt = get_default_options( opt )
     return
     end
   % Transform into r and psi
-  % Check for consistency
-    if isfield( opt, 'r_source_mas' ) && isfield( opt, 'psi_source_deg' )
-      if ( ( sqrt( opt.x_source_mas^2 + opt.y_source_mas^2 ) ~= opt.r_source_mas ) || ( atan2( opt.y_source_mas, opt.x_source_mas ) * 180 / pi ~= opt.psi_source_deg ) )
-      disp( sprintf( '(get_default_options) Changing the values of r_source_mas and psi_source_deg from %3.3f, %3.3f to %3.3f, %3.3f', opt.r_source_mas, opt.psi_source_deg, sqrt( opt.x_source_mas^2 + opt.y_source_mas^2 ), ...
-                     atan2( opt.y_source_mas, opt.x_source_mas ) * 180 / pi ) )
+  %% Check for consistency if r_source_mas and psi_source_deg exist:
+    if isfield( opt, 'r_source_mas' ) && isfield( opt, 'psi_source_deg' ) && ( sqrt( opt.x_source_mas^2 + opt.y_source_mas^2 ) )
+      if ( ( sqrt( opt.x_source_mas^2 + opt.y_source_mas^2 ) ~= opt.r_source_mas ) || ( atan2( opt.y_source_mas, opt.x_source_mas ) * 180 / pi ~= opt.psi_source_deg ) ) 
+      r_source_mas_tmp = sqrt( opt.x_source_mas^2 + opt.y_source_mas^2 ) ;
+      psi_source_deg_tmp = atan2( opt.y_source_mas, opt.x_source_mas ) * 180 / pi ; % deg
+      disp( sprintf( '(get_default_options) Changing the values of r_source_mas and psi_source_deg from %3.3f, %3.3f to %3.3f, %3.3f', opt.r_source_mas, opt.psi_source_deg, r_source_mas_tmp, psi_source_deg_tmp ) )
+      opt.r_source_mas = r_source_mas_tmp ;
+      opt.psi_source_deg = psi_source_deg_tmp ;
       end
     end
-
-  opt.r_source_mas = sqrt( opt.x_source_mas^2 + opt.y_source_mas^2 ) ;
-  % Recall matlab column major convention and atan2(y,x)
-    if opt.r_source_mas % if the radius is zero, the angle does not matter.
-    opt.psi_source_deg = atan2( opt.y_source_mas, opt.x_source_mas ) * 180 / pi ; % deg
-    else
-    opt.psi_source_deg = 0 ;
+  end
+  
+  %% If they are not fields, create them
+    if ~isfield( opt, 'r_source_mas' ) 
+    opt.r_source_mas = sqrt( opt.x_source_mas^2 + opt.y_source_mas^2 ) ;
     end
-  end
-
-% Consistency check
-  if isfield( opt, 'y_source_mas' ) && ~isfield( opt, 'x_source_mas' )
-  disp( '(get_default_options) If opt.y_source_mas is set, opt.x_source_mas must also be set. Returning.' )
-  return
-  end
+    %%% Recall matlab column major convention and atan2(y,x)
+    if ~isfield( opt, 'psi_source_deg' )
+      if opt.r_source_mas % if the radius is zero, the angle does not matter.
+      opt.psi_source_deg = atan2( opt.y_source_mas, opt.x_source_mas ) * 180 / pi ; % deg
+      else
+      opt.psi_source_deg = 0 ;
+      end
+    end
 
 % For ease identification of the pixel on the image
 opt.x_source_mas = opt.r_source_mas * cos( opt.psi_source_deg * pi / 180 ) ;
@@ -139,4 +153,31 @@ opt.y_source_mas = opt.r_source_mas * sin( opt.psi_source_deg * pi / 180 ) ;
   if ~isfield( opt, 'planet' )
   opt.planet = 0 ;
   end
+
+  if ~isfield( opt, 'super_resolution' )
+  opt.super_resolution.res = 1 ;
+  opt.super_resolution.interp_method = 'linear' ;
+  end
+
+  if ~isfield( opt.super_resolution, 'super_resolution' )
+  opt.super_resolution.res = 1 ;
+  end
+
+  if ~isfield( opt.super_resolution, 'interp_method' )
+  opt.super_resolution.interp_method = 'linear' ;
+  end
+
+  if ~isfield( opt, 'low_resolution' )
+  opt.low_resolution.res = 2 ;
+  opt.low_resolution.interp_method = 'linear' ;
+  end
+
+  if ~isfield( opt.low_resolution, 'low_resolution' )
+  opt.low_resolution.res = 2 ;
+  end
+
+  if ~isfield( opt.low_resolution, 'interp_method' )
+  opt.low_resolution.interp_method = 'linear' ;
+  end
+
 

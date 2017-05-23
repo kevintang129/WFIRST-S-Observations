@@ -83,30 +83,50 @@ opt.r_planet_mas = [ 70, 120, 200, 300 ] ; % mas
 opt.phase_planet_deg = [ 0, 120, 230, 270 ] ; % degrees
 opt.contrast_planet = 1e-9 * ( 70 ./ opt.r_planet_mas ).^2 ; % relative to the star
 opt.save_all = 1 ;
-opt.delta_lambda_nm = 500 ;
+% With NI2
+opt.delta_lambda_nm = 90 ;
 starshade_simulation( opt ) ;
 
 %%%%%%%%%%%%%%%%%%%%
 %   INTERPOLATION  %
 %%%%%%%%%%%%%%%%%%%%
 
-clear
-opt.developer = 1 ;
-opt.redo = 0 ;
-opt.create_reference = 1 ;
-opt.star = 1 ;
-opt.delta_lambda_nm = 100 ;
-opt.save = 1 ;
-starshade_interpolation( opt )
+% A) Off-axis objects:
 
 clear
 opt.developer = 1 ;
 opt.redo = 0 ;
 opt.create_reference = 1 ;
 opt.planet = 1 ;
-opt.delta_lambda_nm = 100 ;
+opt.delta_lambda_nm = 30 ;
 opt.save = 1 ;
-starshade_interpolation( opt )
+opt.x_planet_mas = 120 ;
+opt.y_planet_mas = 120 ;
+% For the analysis
+opt.super_resolution.res = 1 ;
+opt.super_resolution.interp_method = 'linear' ;
+opt.low_resolution.res = 2 ;
+opt.low_resolution.interp_method = 'linear' ;
+starshade_interpolation( opt ) ;
+
+
+% B) On-axis onjects: (Star)
+clear
+opt.developer = 1 ;
+opt.redo = 0 ;
+opt.create_reference = 1 ;
+opt.star = 1 ;
+opt.delta_lambda_nm = 30 ;
+opt.save = 1 ;
+starshade_interpolation( opt ) ;
+
+
+
+% Some figures
+figure( 1 )
+imagesc( log10( abs( efDefectImg(:,:,1) ).^2 ) ) ; colorbar ; title( 'Exact simulation. NI2. 425 nm', 'FontSize', 14 )
+figure( 2 )
+imagesc( log10( abs(IntDefectImg(:,:,1) ) ) ) ; colorbar ; title( { 'Exact simulation interpolated at higher resolution. NI2. 425 nm', [ 'Interpolation method: \bf{' opt.interp_method '}. Super resolution factor=' num2str( opt.super_resolution ) ] }, 'FontSize', 14 )
 
 
 

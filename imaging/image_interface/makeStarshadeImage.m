@@ -61,8 +61,17 @@ occulterName = [ folderpath opt.occulter_name '.mat' ] ;
 load( occulterName ); % Load up the comparison occulter
 disp( sprintf( '(makeStarshadeImage) Occulter name: %s', occulterName ) )
 
-% Simulation parameters
-lambdaIn = 300 * nm + dlt_lmbd * nm * ( 0 : 1 : 700 / dlt_lmbd ) ;
+% Simulation parameters (lambdaRange comes from the occulter file)
+  if ~exist( 'lambdaRange', 'var' )
+  disp( sprintf( '(makeStarshadeImage) lambdaRange variable not present in the occulter file %s. Returning.', occulterName ) )
+  dbstop if error
+  make_an_error
+  end
+% More than enough
+lambdaIn = lambdaRange( 1 ) + dlt_lmbd * nm * ( 0 : 1 : 100 / dlt_lmbd ) ;
+% Those who are acceptable within the range of the occulter
+q = find( lambdaIn <= lambdaRange( end ) ) ;
+lambdaIn = lambdaIn( q ) ;
 n_lmbd = numel( lambdaIn ) ;
 disp( sprintf( 'Considering %i wavelengths', numel( lambdaIn ) ) ) 
 imagePlaneDiamInMAS = 2000; % Diameter of image plane in milliarcseconds

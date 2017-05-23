@@ -59,7 +59,8 @@ nw_img = log10( abs_img - fct_scl * min( abs_img( : ) ) ) ;
 set(0,'defaultlinelinewidth',1.0);
 set(0,'DefaultAxesFontSize',14);
 figure( 1 )
-clf; setwinsize(gcf,600,500)
+clf ;
+setwinsize(gcf,600,500)
 imagescnan( nw_img, [ log10( min( opt.contrast_planet ) ) - 3, log10( max( opt.contrast_planet ) ) + 1 ] ) ;
 %imagescnan( nw_img, [ ( min( opt.contrast_planet ) ) / 1000, 10*( max( opt.contrast_planet ) ) ] ) ;
 colorbar
