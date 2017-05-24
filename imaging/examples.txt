@@ -100,13 +100,13 @@ opt.create_reference = 1 ;
 opt.planet = 1 ;
 opt.delta_lambda_nm = 30 ;
 opt.save = 1 ;
-opt.x_planet_mas = 120 ;
-opt.y_planet_mas = 120 ;
 % For the analysis
 opt.super_resolution.res = 1 ;
 opt.super_resolution.interp_method = 'linear' ;
 opt.low_resolution.res = 2 ;
 opt.low_resolution.interp_method = 'linear' ;
+opt.x_planet_mas = 30 ;
+opt.y_planet_mas = 30 ;
 starshade_interpolation( opt ) ;
 
 
@@ -118,6 +118,11 @@ opt.create_reference = 1 ;
 opt.star = 1 ;
 opt.delta_lambda_nm = 30 ;
 opt.save = 1 ;
+% For the analysis
+opt.super_resolution.res = 1 ;
+opt.super_resolution.interp_method = 'linear' ;
+opt.low_resolution.res = 2 ;
+opt.low_resolution.interp_method = 'linear' ;
 starshade_interpolation( opt ) ;
 
 
