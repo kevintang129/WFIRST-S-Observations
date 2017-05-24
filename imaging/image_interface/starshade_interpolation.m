@@ -28,7 +28,7 @@ opt = get_default_options( opt_in ) ;
   disp( sprintf( '(starshade_interpolation) Considering %i reference simulations', n_sm_x * n_sm_y ) )
   opt_sm = opt ;
     for i_sm_x = 1 : n_sm_x   
-    disp( sprintf( '(starshade_interpolation) Considering the simulation %i/%i', i_sm_x, n_sm_x * n_sm_y ) )
+    disp( sprintf( '(starshade_interpolation) Considering the simulation %i/%i', i_sm_x * n_sm_y, n_sm_x * n_sm_y ) )
     opt_sm.x_source_mas = opt.x_source_mas_array( i_sm_x ) ;
       for i_sm_y = 1 : n_sm_y
       opt_sm.y_source_mas = opt.y_source_mas_array( i_sm_y ) ;
