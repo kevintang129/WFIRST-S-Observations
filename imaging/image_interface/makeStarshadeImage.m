@@ -27,6 +27,9 @@ dlt_lmbd = opt.delta_lambda_nm ;
 r_src = opt.r_source_mas ;
 psi_src = opt.psi_source_deg ;
 ppl_fl = opt.pupil_file ;
+Nx_img = opt.Nx_img ; % Number of pixels across image plane
+imagePlaneDiamInMAS = opt.diam_img_mas ; % Diameter of image plane in milliarcseconds
+
 
 % Settings for saving fields
 useSave = opt.save ; % 1 save, 0 don't
@@ -34,11 +37,14 @@ savePath = opt.save_path ;
   if ~isdir( savePath ), system( [ 'mkdir -p ' savePath ] ) ; end
 saveFilename = sprintf( 'starshade_out_Nx_%i_pix_dl_%inm_dr_%3.1f_mas_psi_%3.1f_deg', Nx, dlt_lmbd, r_src, psi_src ) ;
   if strcmp( ppl_fl, '0' ) == 1, saveFilename = sprintf( '%s_ideal', saveFilename ) ; end
+  if opt.Nx_img ~= 400, saveFilename = sprintf( '%s_Nx_img_%04i', saveFilename, opt.Nx_img ) ; end
+  if opt.diam_img_mas ~= 2000, saveFilename = sprintf( '%s_diam_%04i', fl_out, opt.diam_img_mas ) ; end
 
 % Skipping the simulation if it is saved and does not need to be re-done
 if useSave == 1
   if ( ~opt.redo ) && ( exist( [ savePath '/' saveFilename '.mat' ] ) == 2 )
   disp( sprintf( '(makeStarshadeImage) Simulation %s exists. Skipping.', saveFilename ) )
+  load( [ savePath '/' saveFilename '.mat' ] )
   return
   end
   if ( opt.redo ) && ( exist( [ savePath '/' saveFilename '.mat' ] ) == 2 )
@@ -74,8 +80,6 @@ q = find( lambdaIn <= lambdaRange( end ) ) ;
 lambdaIn = lambdaIn( q ) ;
 n_lmbd = numel( lambdaIn ) ;
 disp( sprintf( 'Considering %i wavelengths', numel( lambdaIn ) ) ) 
-imagePlaneDiamInMAS = 2000; % Diameter of image plane in milliarcseconds
-Nxi = 400; % Number of pixels across image plane 
 % Build/load
 if strcmp( ppl_fl, '0' )
     secondarySize = 0; % If you're fine with a generic circular pupil with a secondary (but no struts), set this to the fraction of the radius the secondard covers (e.g. 0.2)
@@ -174,27 +178,27 @@ disp( sprintf('%s took %3.2f seconds, %3.2f per wavelength bin', bdwf_lbl, t, t 
 
 tic
   if ( opt.developer )
-  [ ~, ~, impeak ] = mft_image( 1, Nxi, pupil ) ; % Use 1 L/D square
+  [ ~, ~, impeak ] = mft_image( 1, Nx_img, pupil ) ; % Use 1 L/D square
   else
-  [ ~, ~, impeak ] = mft( 1, Nxi, pupil ) ; % Use 1 L/D square
+  [ ~, ~, impeak ] = mft( 1, Nx_img, pupil ) ; % Use 1 L/D square
   end
 peak = max(abs(impeak(:)));
 
-masPerPixel = imagePlaneDiamInMAS/Nxi;
-efDefectImg = zeros(Nxi, Nxi, length(lambdaIn));
+masPerPixel = imagePlaneDiamInMAS/Nx_img;
+efDefectImg = zeros(Nx_img, Nx_img, length(lambdaIn));
 for ll = 1:length(lambdaIn)
     UTot = UTotL(:,:,ll);
     lambda = lambdaIn(ll);
     disp(['Wavelength: ' num2str(lambda*1e9) 'nm'])
     
     D = telescopeDiameter;
-    imagePlaneDiameterInMAS = Nxi*masPerPixel;
+    imagePlaneDiameterInMAS = Nx_img*masPerPixel;
     imagePlaneDiameterInLambdaOverD = imagePlaneDiameterInMAS*mas*D/lambda;
    
       if ( opt.developer ) 
-      [Xout, Yout, imagePlane] = mft_image(imagePlaneDiameterInLambdaOverD, Nxi, UTot.*pupil);
+      [Xout, Yout, imagePlane] = mft_image(imagePlaneDiameterInLambdaOverD, Nx_img, UTot.*pupil);
       else
-      [Xout, Yout, imagePlane] = mft(imagePlaneDiameterInLambdaOverD, Nxi, UTot.*pupil);
+      [Xout, Yout, imagePlane] = mft(imagePlaneDiameterInLambdaOverD, Nx_img, UTot.*pupil);
       end
     imagePlane = imagePlane/peak; % Normalize to unocculted on-axis peak = 1
     
@@ -204,7 +208,7 @@ t = toc ;
 disp( sprintf( 'efDefectImg took %3.2f seconds', t ) )
 
 if useSave == 1
-    save([savePath '/' saveFilename '.mat' ], 'efDefectImg', 'lambdaIn', 'vecPetalArray')
+    save([savePath '/' saveFilename '.mat' ], 'efDefectImg', 'lambdaIn', 'vecPetalArray', 'opt' )
 end
 
 dbstop if error

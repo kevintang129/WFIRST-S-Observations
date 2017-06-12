@@ -11,7 +11,7 @@ function opt = get_default_options( opt )
 
 % Switch to control some work that needs to be re-done or may be skipped if it already exists
   if ~isfield( opt, 'redo' )
-  opt.redo = 1 ;
+  opt.redo = 0 ;
   end
 
 % Occulter Name
@@ -22,6 +22,20 @@ function opt = get_default_options( opt )
 % Size of the pupil data in pixels (square)
   if ~isfield( opt, 'Nx_pupil_pix' )
   opt.Nx_pupil_pix = 64 ;
+  end
+
+% Number of pixels across image plane
+  if ~isfield( opt, 'Nx_image_pix' )
+  opt.Nx_img = 400 ;
+  else
+  opt.Nx_img = opt.Nx_image_pix ;
+  end
+
+% Diameter of image plane in milliarcseconds
+  if ~isfield( opt, 'diam_image_mas' )
+  opt.diam_img_mas = 2000 ;
+  else
+  opt,diam_img_mas = opt.diam_image_mas ;
   end
 
 % Step of wavelength to consider
@@ -159,7 +173,7 @@ opt.y_source_mas = opt.r_source_mas * sin( opt.psi_source_deg * pi / 180 ) ;
   opt.super_resolution.interp_method = 'linear' ;
   end
 
-  if ~isfield( opt.super_resolution, 'super_resolution' )
+  if ~isfield( opt.super_resolution, 'res' )
   opt.super_resolution.res = 1 ;
   end
 
@@ -172,12 +186,23 @@ opt.y_source_mas = opt.r_source_mas * sin( opt.psi_source_deg * pi / 180 ) ;
   opt.low_resolution.interp_method = 'linear' ;
   end
 
-  if ~isfield( opt.low_resolution, 'low_resolution' )
+  if ~isfield( opt.low_resolution, 'res' )
   opt.low_resolution.res = 2 ;
   end
 
   if ~isfield( opt.low_resolution, 'interp_method' )
   opt.low_resolution.interp_method = 'linear' ;
   end
+
+  % Number of exact simulations to derive interpolation results: for instance, 2*N+1, -N, -N+1, ..., -1, 0, 1, ..., N-1, N
+  if ~isfield( opt, 'n_basis_interpolation' )
+  opt.n_basis_interpolation = 5 ;
+  end
+
+  % Step in mas for a series of simulations
+  if ~isfield( opt, 'step_mas' )
+  opt.step_mas = 5 ;
+  end
+ 
 
 

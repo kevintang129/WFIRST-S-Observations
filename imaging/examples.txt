@@ -79,13 +79,74 @@ plotStarshadeImage( opt )
 clear
 opt.r_star_mas = 0 ; % mas
 opt.psi_star_deg = 0 ; % degrees
-opt.r_planet_mas = [ 70, 120, 200, 300 ] ; % mas
-opt.phase_planet_deg = [ 0, 120, 230, 270 ] ; % degrees
-opt.contrast_planet = 1e-9 * ( 70 ./ opt.r_planet_mas ).^2 ; % relative to the star
+r_planet_mas = [ 69, 70, 71, 119, 120, 121, 199, 200, 201, 349, 350, 351 ] ; % mas
+phase_planet_deg = [ 230, 230, 230, 90, 90, 90, 280, 280, 280, 25, 25, 25 ] ; % degrees
+% Simulating an orbital plane with some inclination
+x = r_planet_mas .* sin( pi /180 * phase_planet_deg ) ;
+incl_deg = 75 ; % deg
+y =  r_planet_mas .* cos( pi /180 * phase_planet_deg ) * cos( pi / 180 * incl_deg ) ;
+plot( x, y, '+' ) ; 
+opt.r_planet_mas = sqrt( x.^2 + y.^2 ) ;
+opt.phase_planet_deg = 180 / pi * atan2( y, x ) ;
+% Rayleigh-Jeans factors for the phase function, 
+% from figure 7 of Madhusudhan&Burrows (2012) ApJ 747
+fct_phs_fnctn = [ 0.5, 0.5, 0.5, 0.85, 0.85, 0.85, 0.3, 0.3, 0.3, 0.1, 0.1, 0.1 ] ;
+opt.contrast_planet = 1e-9 * ( 70 ./ opt.r_planet_mas ).^2 .* fct_phs_fnctn ; % relative to the star
 opt.save_all = 1 ;
 % With NI2
 opt.delta_lambda_nm = 90 ;
+opt.redo = 0
 starshade_simulation( opt ) ;
+
+% Movie (without Rayleigh scattering)
+% Simulation of some star & planets configuration
+clear
+opt.r_star_mas = 0 ; % mas
+opt.psi_star_deg = 0 ; % degrees
+n_steps = 100 ;
+r_planet_mas = 250 * ones(1, n_steps ) ; % mas
+phase_planet_deg = 0 : 360 / ( n_steps - 1 ) : 360 ; % degrees
+% Simulating an orbital plane with some inclination
+incl_deg = 90 ; % deg
+x = r_planet_mas .* sin( pi /180 * phase_planet_deg ) * cos( pi / 180 * incl_deg ) ;
+y =  r_planet_mas .* cos( pi /180 * phase_planet_deg ) ;
+plot( x, y, '+' ) ; xlim( [-100, 100 ] ) ; ylim( [-100,100 ] ) ;
+grid ;
+opt.r_planet_mas = sqrt( x.^2 + y.^2 ) ;
+opt.phase_planet_deg = 180 / pi * atan2( y, x ) ;
+opt.contrast_planet = 1e-9 * ones( 1, numel( x ) ) ; % relative to the star
+opt.save_all = 1 ;
+% With NI2
+% Only one wavelength
+opt.delta_lambda_nm = 200 ;
+opt.redo =0
+starshade_simulation( opt ) ;
+
+% Movie (without Rayleigh scattering)
+% Simulation of some star & planets configuration
+clear
+opt.r_star_mas = 0 ; % mas
+opt.psi_star_deg = 0 ; % degrees
+n_steps = 20 ;
+r_planet_mas = 250 * ones(1, n_steps ) ; % mas
+phase_planet_deg = 0 : 360 / ( n_steps - 1 ) : 360 ; % degrees
+% Simulating an orbital plane with some inclination
+incl_deg = 90 ; % deg
+x = r_planet_mas .* sin( pi /180 * phase_planet_deg ) * cos( pi / 180 * incl_deg ) ;
+y =  r_planet_mas .* cos( pi /180 * phase_planet_deg ) ;
+%plot( x, y, '+' ) ; xlim( [-100, 100 ] ) ; ylim( [-100,100 ] ) ;
+%grid ;
+opt.r_planet_mas = sqrt( x.^2 + y.^2 ) ;
+opt.phase_planet_deg = 180 / pi * atan2( y, x ) ;
+opt.contrast_planet = 1e-9 * ones( 1, numel( x ) ) ; % relative to the star
+opt.save_all = 1 ;
+% With NI2
+% Only one wavelength
+opt.delta_lambda_nm = 200 ;
+opt.redo = 0 ;
+starshade_simulation( opt ) ;
+
+
 
 %%%%%%%%%%%%%%%%%%%%
 %   INTERPOLATION  %
@@ -101,13 +162,24 @@ opt.planet = 1 ;
 opt.delta_lambda_nm = 30 ;
 opt.save = 1 ;
 % For the analysis
+opt.step_mas = 8 ; % ( 5, 8 )
+opt.n_basis_interpolation = 17 ; (11)
 opt.super_resolution.res = 1 ;
 opt.super_resolution.interp_method = 'linear' ;
 opt.low_resolution.res = 2 ;
-opt.low_resolution.interp_method = 'linear' ;
-opt.x_planet_mas = 30 ;
-opt.y_planet_mas = 30 ;
+opt.low_resolution.interp_method = 'spline' ;
+opt.x_planet_mas = 0 ; % ( 0, 30, 120 )
+opt.y_planet_mas = 0 ; % ( 0, 30, 120 )
 starshade_interpolation( opt ) ;
+
+% A1) Simulation at a single location to check the interpolation in wavelength
+clear
+opt.developer = 1 ;
+opt.delta_lambda_nm = 10 ;
+opt.save = 1 ;
+opt.x_source_mas = 31 ; % ( 31, 123 )
+opt.y_source_mas = 31 ; % ( 31, 123 )
+makeStarshadeImage( opt ) ;
 
 
 % B) On-axis onjects: (Star)
@@ -124,6 +196,35 @@ opt.super_resolution.interp_method = 'linear' ;
 opt.low_resolution.res = 2 ;
 opt.low_resolution.interp_method = 'linear' ;
 starshade_interpolation( opt ) ;
+
+
+% C) Radial interpolation
+clear
+opt.developer = 1 ;
+opt.redo = 0 ;
+opt.create_reference = 1 ;
+opt.polar = 1 ;
+opt.polar_radius_1 = 0 ; % mas
+opt.polar_radius_2 = 120 ; % mas
+opt.polar_alpha_1 = 0 ; % deg
+opt.polar_alpha_2 = 90. / 14 ; % deg (NI2)
+opt.delta_lambda_nm = 200 ; % Only one
+opt.save = 1 ;
+% For the analysis
+opt.step_mas = 1 ; % ( 1 )
+opt.n_basis_interpolation = 17 ; % (11)
+opt.super_resolution.res = 1 ;
+opt.super_resolution.interp_method = 'linear' ;
+opt.low_resolution.res = 2 ;
+opt.low_resolution.interp_method = 'spline' ;
+opt.x_planet_mas = 0 ; % ( 0, 30, 120 )
+opt.y_planet_mas = 0 ; % ( 0, 30, 120 )
+starshade_interpolation( opt ) ;
+
+% D) Translation
+clear
+opt.Nx_image_pix = 1200 ;
+starshade_translation( opt ) ;
 
 
 
