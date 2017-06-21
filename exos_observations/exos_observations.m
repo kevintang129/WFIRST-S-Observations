@@ -87,6 +87,7 @@ opt = get_opt( opt ) ;
 % 1.-Creating the grid of observed coordinates
 [ LON_GRID, LAT_GRID ECL_LAT_GRID ] = observed_grid( opt ) ;
 
+
 % 2.- Observation map for a given date
 clf
 h_plt = plot_generic( LON_GRID, LAT_GRID, ECL_LAT_GRID, opt ) ;
@@ -118,6 +119,7 @@ opt = list_of_targets( opt ) ;
   saveas( gca, pth_nm_img, 'png' ) ;
   disp( [ '(EXOS_OBSERVATIONS) Stored image: ' pth_nm_img '.png' ] ) ;
   end
+
 % 6.2.- Altogether
 plot_targets_in_time( opt ) ;
 
