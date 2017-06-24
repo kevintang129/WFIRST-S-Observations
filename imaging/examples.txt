@@ -222,9 +222,37 @@ opt.y_planet_mas = 0 ; % ( 0, 30, 120 )
 starshade_interpolation( opt ) ;
 
 % D) Translation
+% D1) 5 mas/pix (lambda=425 nm, lambda/D = 36 mas)
 clear
-opt.Nx_image_pix = 1200 ;
+opt.Nx_image_pix = 400 ;
+opt.diam_img_mas = 2000 ;
 starshade_translation( opt ) ;
+
+% D2) 10 mas/pix
+clear
+opt.Nx_image_pix = 200 ;
+opt.diam_img_mas = 2000 ;
+starshade_translation( opt ) ;
+
+% D4) 20 mas/pix
+clear
+opt.Nx_image_pix = 100 ;
+opt.diam_img_mas = 2000 ;
+starshade_translation( opt ) ;
+
+% D3) 0.5 mas / pix
+clear
+opt.Nx_image_pix = 4000 ;
+opt.diam_img_mas = 2000 ;
+starshade_translation( opt ) ;
+
+% E) Simulation for the non-shaded area
+clear
+opt.Nx_image_pix = 4000 ;
+opt.diam_img_mas = 2000 ;
+opt.Nx_pupil_pix = 64 ;
+opt.image_input.exozodi = 1 ;
+starshade_external_simulation( opt ) ;
 
 
 
