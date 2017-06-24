@@ -204,5 +204,15 @@ opt.y_source_mas = opt.r_source_mas * sin( opt.psi_source_deg * pi / 180 ) ;
   opt.step_mas = 5 ;
   end
  
+% For the simulation work
+
+  if ~isfield( opt, 'input_image' )
+  opt.input_image.exozodi = 1 ;
+  end
+  
+  % Some input images
+  if ~isfield( opt.input_image, 'exozodi' )
+  opt.input_image.exozodi = 1 ;
+  end
 
 
