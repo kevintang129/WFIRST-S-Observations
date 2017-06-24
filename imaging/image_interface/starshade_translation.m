@@ -3,13 +3,17 @@ function starshade_translation( opt )
 
 % For plotting (temporary)
   if ~exist( 'i_src_plt', 'var' )
-  i_src_plt = 2 ;
+  i_src_plt = 3 ;
   end
 
 
 % Some sources
-r_src = [ 400, 350, 300.5, 300, 200.5, 200.1, 200 ] ; % mas
-psi_src = [ 0, 0, 0, 0, 0, 0, 0 ] ; % deg
+r_src = [ 400, 305, 302.5, 302, 300, 202.5, 202, 200, 152.5, 150.5, 150, 102.5, 101, 100 ] ; % 350, 304, 303, 301, 300.5, 200.5, 200.1, 200 ] ; % mas
+psi_src = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ; % deg
+%r_src = [ 400, 302.5, 300, 200, 102.5, 101, 100 ] ;
+%psi_src = [ 90, 90, 90, 90, 90, 90, 90 ] ;
+%r_src = [ 400, sqrt( 200^2 + 200^2 ), 200, 200, sqrt( 151^2 + 17^2 ) ] ;
+%psi_src = [ 0, 45, 0, 90, 180 / pi * atan2( 17, 151 ) ] ;
 n_src=  numel( r_src ) ;
   if numel( psi_src ) ~= n_src
   disp( '(starshade_translation) Number of elements for radius and angle is different. Stopped.' )
@@ -22,7 +26,6 @@ opt.delta_lambda_nm = 200 ;
 opt.redo = 0 ;
 opt.save = 1 ;
 % Only one wavelength
-opt.delta_lambda_nm = 200 ;
 opt = get_default_options( opt ) ;
   for i_src = 1 : n_src
   opt.r_source_mas = r_src( i_src ) ;
@@ -32,7 +35,7 @@ opt = get_default_options( opt ) ;
 
 % Loading each simulation (notation from makeStarshadeImage)
 dr_out = 'out_dev/' ;
-% FOr files created before the new parameter was introduced
+% For files created before the new parameter was introduced
 Nx_img_tmp = opt.Nx_img ;
 diam_img_mas_tmp = opt.diam_img_mas ;
   for i_src = 1 : n_src
@@ -42,7 +45,10 @@ diam_img_mas_tmp = opt.diam_img_mas ;
   load( [ fl_out '.mat' ] ) 
   opt.Nx_img = Nx_img_tmp ;
   opt.diam_img_mas = diam_img_mas_tmp ;
-  int_src( i_src, :, : ) = abs( efDefectImg ).^2 ;
+  n_lmbd = size( efDefectImg, 3 ) ;
+    for i_lmbd = 1 : n_lmbd
+    int_src( i_src, i_lmbd, :, : ) = abs( squeeze( efDefectImg( :, :, i_lmbd ) ) ).^2 ;
+    end
   end
 
 % Testing the translation
@@ -51,54 +57,89 @@ diam_img_mas_tmp = opt.diam_img_mas ;
 %% Reference source is the first one
 fct_img_1 = opt.Nx_img / 400 ;
 mas_pr_px = opt.diam_img_mas / opt.Nx_img ;
-
-  for i_src = 2 : n_src
-  idx_circ = ceil( ( r_src( 1 ) - r_src( i_src ) ) / mas_pr_px ) ;
-  src_dff( i_src - 1, :, : ) = circshift( squeeze( int_src( i_src, :, : ) ), idx_circ ) - squeeze( int_src( 1, :, : ) ) ; 
-  end
-
-% Test
-n_tmp = 30 * fct_img_1 ;
-a1 = opt.Nx_img / 2 + r_src( 1 ) * sin( 180 / pi * psi_src( 1 ) ) / mas_pr_px - 30 * fct_img_1 ;
-a2 = opt.Nx_img / 2 + r_src( 1 ) * sin( 180 / pi * psi_src( 1 ) ) / mas_pr_px + 30 * fct_img_1 ;
-b1 = opt.Nx_img / 2 + r_src( 1 ) * cos( 180 / pi * psi_src( 1 ) ) / mas_pr_px - 30 * fct_img_1 ;
-b2 = opt.Nx_img / 2 + r_src( 1 ) * cos( 180 / pi * psi_src( 1 ) ) / mas_pr_px + 30 * fct_img_1 ;
-  for i_src = 2 : n_src
-    for i_tmp = 1 : n_tmp
-    idx_circ = ceil( ( r_src( 1 ) - r_src( i_src ) + ( i_tmp - n_tmp / 2 ) ) / mas_pr_px ) ;
-    tmp = abs( circshift( squeeze( int_src( i_src, :, : ) ), idx_circ ) - squeeze( int_src( 1, :, : ) ) ) ;
-    tmp = tmp( b1 : b2, a1 : a2 ) ;
-    src_dff_circ( i_src - 1, i_tmp ) = sum( tmp( : ) ) ;
+clear src_dff
+  for i_src_rf = 1 : n_src ;
+    for i_src = 1 : n_src
+    idx_circ_x = ceil( ( r_src( i_src_rf ) * cos( pi / 180 * psi_src( i_src_rf ) ) - r_src( i_src ) * cos( pi / 180 * psi_src( i_src ) ) )  / mas_pr_px ) ;
+    idx_circ_y = ceil( ( r_src( i_src_rf ) * sin( pi / 180 * psi_src( i_src_rf ) ) - r_src( i_src ) * sin( pi / 180 * psi_src( i_src ) ) ) / mas_pr_px ) ;
+      for i_lmbd =1 : n_lmbd
+      a1 = opt.Nx_img / 2 + r_src( i_src_rf ) * sin( pi / 180 * psi_src( i_src_rf ) ) / mas_pr_px - 50 * fct_img_1 ;
+      a2 = opt.Nx_img / 2 + r_src( i_src_rf ) * sin( pi / 180 * psi_src( i_src_rf ) ) / mas_pr_px + 50 * fct_img_1 ; 
+      b1 = opt.Nx_img / 2 + r_src( i_src_rf ) * cos( pi / 180 * psi_src( i_src_rf ) ) / mas_pr_px - 50 * fct_img_1 ;
+      b2 = opt.Nx_img / 2 + r_src( i_src_rf ) * cos( pi / 180 * psi_src( i_src_rf ) ) / mas_pr_px + 50 * fct_img_1 ;
+      tmp = circshift( squeeze( int_src( i_src, i_lmbd, :, : ) ), [ idx_circ_x idx_circ_y ] ) - squeeze( int_src( i_src_rf, i_lmbd, :, : ) ) ;
+      src_dff( i_src_rf, i_src, i_lmbd, :, : ) = tmp( round( b1 ) : round( b2 ),  round( a1 ) : round( a2 ) ) ;
+      end
     end
   end
 
-close all
-hold all
-figure( 1 )
-  for i_src = 1 : n_src - 1
-  plot( squeeze( src_dff_circ( i_src, : ) ), '+-' )
-  xlim( [ n_tmp / 2 - round( mas_pr_px ), n_tmp / 2  ] )
-  lgnd{ i_src } = sprintf( 'r_{src}=%3.2f mas', r_src( i_src + 1 ) ) ;
+% Reduced to the standard size
+%% Two reductions before & after
+clear src_dff_0
+  for i_src_rf = 1 : n_src ;
+    for i_src = 1 : n_src
+    idx_circ_x = ceil( ( r_src( i_src_rf ) * cos( pi / 180 * psi_src( i_src_rf ) ) - r_src( i_src ) * cos( pi / 180 * psi_src( i_src ) ) ) / mas_pr_px / fct_img_1 ) ;
+    idx_circ_y = ceil( ( r_src( i_src_rf ) * sin( pi / 180 * psi_src( i_src_rf ) ) - r_src( i_src ) * sin( pi / 180 * psi_src( i_src ) ) ) / mas_pr_px / fct_img_1 ) ;
+      for i_lmbd =1 : n_lmbd
+      a1 = round( opt.Nx_img / 2 / fct_img_1 + r_src( i_src_rf ) * sin( pi / 180 * psi_src( i_src_rf ) ) / mas_pr_px / fct_img_1 - 50 ) ;
+      a2 = round( opt.Nx_img / 2 / fct_img_1 + r_src( i_src_rf ) * sin( pi / 180 * psi_src( i_src_rf ) ) / mas_pr_px / fct_img_1 + 50 ) ;
+      b1 = round( opt.Nx_img / 2 / fct_img_1 + r_src( i_src_rf ) * cos( pi / 180 * psi_src( i_src_rf ) ) / mas_pr_px / fct_img_1 - 50 ) ;
+      b2 = round( opt.Nx_img / 2 / fct_img_1 + r_src( i_src_rf ) * cos( pi / 180 * psi_src( i_src_rf ) ) / mas_pr_px / fct_img_1 + 50 ) ;
+      tmp = circshift( imresize( squeeze( int_src( i_src, i_lmbd, :, : ) ), 1 / fct_img_1 ), [ idx_circ_x idx_circ_y ] ) - imresize( squeeze( int_src( i_src_rf, i_lmbd, :, : ) ), 1 / fct_img_1 ) ;
+      % Before
+      src_dff_0( 1, i_src_rf, i_src, i_lmbd, 1 : b2 - b1 + 1, 1 : a2 - a1 + 1 ) = tmp( b1 : b2, a1 : a2 ) ;
+      % after
+      tmp = imresize( squeeze( src_dff( i_src_rf, i_src, i_lmbd, :, : ) ), 1 / fct_img_1 ) ;
+      src_dff_0( 2, i_src_rf, i_src, i_lmbd, 1 : size( tmp, 1 ), 1 : size( tmp, 2 ) ) = tmp;
+      end
+    end
   end
-legend( lgnd ) 
-hold off
-
 
 % Some plotting
-figure( 2 )
+n_src  = numel( r_src ) ;
 opt.log10 = 0 ;
-  if ~isfield( opt, 'log10' )
-  opt.log10 = 0 ;
-  end
+%% Reduced resolution
+lbl_rd = { 'before shifting', 'after shifting' } ;
+if ( 0 )
+  for i_rd = 1 : 2
+    for i_src_rf = 1 : n_src
+    figure( ( i_rd - 1 ) * n_src + i_src_rf )
+    setwinsize( gcf, 1300, 750 )
+    clf
+    i_lmbd = 1 ;
+      for i_src_plt = 1 : n_src
+      subplot( 4, 4, i_src_plt )
+        if ( opt.log10 )
+        imagesc( log10( abs( squeeze( src_dff_0( i_rd, i_src_rf, i_src_plt, i_lmbd, :, : ) ) ) ) ) ; h = colorbar ; ylabel( h, 'Log10(Intensity)', 'FontSize', 16 ) ;
+        else
+        imagesc( ( abs( squeeze( src_dff_0( i_rd, i_src_rf, i_src_plt, i_lmbd, :, : ) ) ) ) ) ; h = colorbar ; ylabel( h, 'Intensity (Linear)', 'FontSize', 16 ) ;
+        end
+      set( gca, 'xtick', [], 'ytick', [] )
+      title( sprintf( 'r_{src}=%3.2f mas, r_{ref}=%3.2f', r_src( i_src_plt ), r_src( i_src_rf ) ) )
+      end
+    suptitle( sprintf( 'Reduction %s', lbl_rd{ i_rd } ) ) ;
+    end
+  end % i_rd
+end
 
-  if ( opt.log10 )
-  imagesc( log10( abs( squeeze( src_dff( i_src_plt - 1, :, : ) ) ) ) ) ; h = colorbar ; ylabel( h, 'Log10(Intensity)', 'FontSize', 16 ) ;
-  else
-  imagesc( ( abs( squeeze( src_dff( i_src_plt - 1, :, : ) ) ) ) ) ; h = colorbar ; ylabel( h, 'Intensity (Linear)', 'FontSize', 16 ) ;
+%% Input resolution
+  for i_src_rf = 1 : n_src
+  figure( 2 * n_src + i_src_rf )
+  setwinsize( gcf, 1300, 750 )
+  clf
+  i_lmbd = 1 ;
+    for i_src_plt = 1 : numel( r_src )
+    subplot( 4, 4, i_src_plt )
+      if ( opt.log10 )
+      imagesc( log10( abs( squeeze( src_dff( i_src_rf, i_src_plt, i_lmbd, :, : ) ) ) ) ) ; h = colorbar ; ylabel( h, 'Log10(Intensity)', 'FontSize', 16 ) ;
+      else
+      imagesc( ( abs( squeeze( src_dff( i_src_rf, i_src_plt, i_lmbd, :, : ) ) ) ) ) ; h = colorbar ; ylabel( h, 'Intensity (Linear)', 'FontSize', 16 ) ;
+      end
+    set( gca, 'xtick', [], 'ytick', [] ) 
+    title( sprintf( 'r_{src}=%3.2f mas, r_{ref}=%3.2f', r_src( i_src_plt ), r_src( i_src_rf ) ) )
+    end
+suptitle( sprintf( 'Initial resolution %ix%i times the input one', fct_img_1, fct_img_1 ) )
   end
-xlim( [ opt.Nx_img / 2 + r_src( 1 ) * sin( 180 / pi * psi_src( 1 ) ) / mas_pr_px - 50 * fct_img_1, opt.Nx_img / 2 + r_src( 1 ) * sin( 180 / pi * psi_src( 1 ) ) / mas_pr_px + 50 * fct_img_1 ] ) ;
-ylim( [ opt.Nx_img / 2 + r_src( 1 ) * cos( 180 / pi * psi_src( 1 ) ) / mas_pr_px - 50 * fct_img_1, opt.Nx_img / 2 + r_src( 1 ) * cos( 180 / pi * psi_src( 1 ) ) / mas_pr_px + 50 * fct_img_1 ] ) ;
-title( sprintf( 'r_{src}=%3.2f mas', r_src( i_src_plt ) ) )
 
 dbstop if error
 make_an_error
