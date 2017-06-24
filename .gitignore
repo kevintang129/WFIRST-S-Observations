@@ -1,0 +1,8 @@
+# ignore generated mat files
+imaging/*.mat
+imaging/*.png
+imaging//out/
+imaging//out_dev/
+imaging//fig/
+imaging//fig_dev/
+imaging/in/.DS_Store
