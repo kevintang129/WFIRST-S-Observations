@@ -34,6 +34,7 @@ function opt = wfirst_s_observations( opt )
 % constant orbital angular velocity (might not be accurate for some parallaxes?)
 % Optional: use the coordinate transformations tools from:
 % https://webhome.weizmann.ac.il/home/eofek/matlab/fun_content.html
+% Nota Bene: Matlab cannot read binary Excel sheets unless in Windows OS. So, this is ExoCat.xlsb, then saved as xlsx.
 
 % Quick summary:
 % Circular orbit at L2, locked with Earth. No particular orbit around L2.
@@ -564,7 +565,8 @@ opt_out = opt ;
 % List of targets from Exocat
 function opt_out = list_of_targets_exocat( opt )
 
-[num,txt,raw] = xlsread('ExoCat1.xls'); %import data from ExoCat
+% Nota Bene: Matlab cannot read binary Excel sheets unless in Windows OS. So, this is ExoCat.xlsb, then saved as xlsx.
+[num,txt,raw] = xlsread('in/ExoCat1.xlsx'); %import data from ExoCat
 % IDs must be common names or Hipparcos ID #s
 % Examples: 'HIP 19849', 'HIP 30920'
 opt_out.target.name = lower(opt_out.target.name)
@@ -1337,7 +1339,7 @@ N_sigma_per_day_obs = sum(N_sigma_obs)/(sum(dy_period_obs)-(numel(dy_period_obs)
 function opt_out = all_targets(opt)
 opt_out = opt ;
 data = xlsread('in/ExoCat1.xlsx'); %import data from ExoCat
-HIPID_all = xlsread('ExoCat1.xlsx', 'A:A'); 
+HIPID_all = xlsread('in/ExoCat1.xlsx', 'A:A'); 
 L=length(HIPID_all);
 
 %put data into arrays
