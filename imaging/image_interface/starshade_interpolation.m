@@ -15,8 +15,8 @@ opt = get_default_options( opt_in ) ;
     if ( opt.star )
     % Studying some relative positions
     %% Small displacements for the star (pointing errors) centered at the center
-    opt.x_source_mas_array = [ -5 : 1 : 5 ] ; % mas
-    opt.y_source_mas_array = [ -5 : 1 : 5 ] ; % mas
+    opt.x_source_mas_array = [ -20 : 1 : 20 ] ; % mas
+    opt.y_source_mas_array = [ -20 : 1 : 20 ] ; % mas
     end
 
     %% Medium displacements for the planet centered at some position
@@ -95,7 +95,7 @@ opt = get_default_options( opt_in ) ;
       psi_src = opt_sm.psi_source_deg ;
       ppl_fl = opt_sm.pupil_file ;
       savePath = opt_sm.save_path ;
-      saveFilename = sprintf( 'starshade_out_Nx_%i_pix_dl_%inm_dr_%3.1f_mas_psi_%3.1f_deg', Nx, dlt_lmbd, r_src, psi_src ) ;
+      saveFilename = sprintf( 'starshade_out_Nx_%i_pix_dl_%inm_dr_%3.1f_mas_psi_%3.1f_deg', Nx, dlt_lmbd, r_src, psi_src ) 
         if strcmp( ppl_fl, '0' ) == 1, saveFilename = sprintf( '%s_ideal', saveFilename ) ; end
       load( [ savePath saveFilename '.mat' ] )
       % Making sure the options are the ones in the call and not the ones stored:
@@ -224,6 +224,8 @@ opt = get_default_options( opt_in ) ;
   suptitle( sprintf( 'Occulter: %s, lambda=%3.0f nm (I1=%i/%i=%2d mas, I2=%i/%i=%2d mas)', opt.occulter_name, lambdaIn( i_lmbd ) * 1e9, i_1, numel( opt.x_source_mas_array ), ...
             opt.x_source_mas_array( i_1 ), i_2, numel( opt.y_source_mas_array ), opt.y_source_mas_array( i_2 ) ) ) 
 
+dbstop if error
+make_an_error
 
 
     if ( 0 )

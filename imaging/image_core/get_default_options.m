@@ -3,7 +3,6 @@ function opt = get_default_options( opt )
 % History:
 % 05/12/17: created, Sergi Hildebrandt (JPL/Caltech)
 
-
 % Developer version or Eric Cady's original version
   if ~isfield( opt, 'developer' )
   opt.developer = 0 ;
@@ -51,7 +50,6 @@ function opt = get_default_options( opt )
 % s2 = sin(psi2);
 % c2 = cos(psi2);
 
-
 % Checks of consistency
   if isfield( opt, 'r_source_mas' ) && ~isfield( opt, 'psi_source_deg' )
   disp( '(get_default_options) r_source_mas set, but psi_source_deg not. Inconsistent. Returning.' )
@@ -82,6 +80,9 @@ function opt = get_default_options( opt )
   return
   end
 
+% Sentinel for changes in the filename where results are stored
+rplc_fl_nm = 0 ;
+
   if isfield( opt, 'x_source_mas' )
   % Consistency check
     if ~isfield( opt, 'y_source_mas' )
@@ -89,14 +90,16 @@ function opt = get_default_options( opt )
     return
     end
   % Transform into r and psi
-  %% Check for consistency if r_source_mas and psi_source_deg exist:
-    if isfield( opt, 'r_source_mas' ) && isfield( opt, 'psi_source_deg' ) && ( sqrt( opt.x_source_mas^2 + opt.y_source_mas^2 ) )
+  % Different situations where it is requeired to check the consistency between r_source_mas, psi_source_deg, x_source_mas and y_source_mas:
+    if ( opt.x_source_mas ) || ( opt.y_source_mas ) 
       if ( ( sqrt( opt.x_source_mas^2 + opt.y_source_mas^2 ) ~= opt.r_source_mas ) || ( atan2( opt.y_source_mas, opt.x_source_mas ) * 180 / pi ~= opt.psi_source_deg ) ) 
       r_source_mas_tmp = sqrt( opt.x_source_mas^2 + opt.y_source_mas^2 ) ;
       psi_source_deg_tmp = atan2( opt.y_source_mas, opt.x_source_mas ) * 180 / pi ; % deg
       disp( sprintf( '(get_default_options) Changing the values of r_source_mas and psi_source_deg from %3.3f, %3.3f to %3.3f, %3.3f', opt.r_source_mas, opt.psi_source_deg, r_source_mas_tmp, psi_source_deg_tmp ) )
       opt.r_source_mas = r_source_mas_tmp ;
       opt.psi_source_deg = psi_source_deg_tmp ;
+      % Update filename where results are stored
+      rplc_fl_nm = 1 ;
       end
     end
   end
@@ -123,6 +126,12 @@ opt.y_source_mas = opt.r_source_mas * sin( opt.psi_source_deg * pi / 180 ) ;
   opt.pupil_file = './in/pupil_D1Kpix_2048.fits' ;
   end
 
+% For plotting.
+  if ~isfield( opt, 'plot' )
+  opt.plot = 0 ;
+  end
+
+% NB: Name of the filename to store the results at the end of the code
 % Saving all the output results and images (0=No, 1=Yes)
   if ~isfield( opt, 'save_all' )
   opt.save_all = 0 ;
@@ -145,7 +154,7 @@ opt.y_source_mas = opt.r_source_mas * sin( opt.psi_source_deg * pi / 180 ) ;
 
 % paths to save the results
   if ~isfield( opt, 'save_path' )
-  opt.save_path = './out' ;
+  opt.save_path = './out/' ;
     if ( opt.developer )
     opt.save_path = './out_dev/' ;
     end
@@ -153,7 +162,7 @@ opt.y_source_mas = opt.r_source_mas * sin( opt.psi_source_deg * pi / 180 ) ;
 
 % Saving the figures
   if ~isfield( opt, 'save_path_fig' )
-  opt.save_path_fig = './fig' ;
+  opt.save_path_fig = './fig/' ;
     if ( opt.developer )
     opt.save_path_fig = './fig_dev/' ;
     end
@@ -166,6 +175,10 @@ opt.y_source_mas = opt.r_source_mas * sin( opt.psi_source_deg * pi / 180 ) ;
 
   if ~isfield( opt, 'planet' )
   opt.planet = 0 ;
+  end
+
+  if ~isfield( opt, 'polar' )
+  opt.polar = 0 ;
   end
 
   if ~isfield( opt, 'super_resolution' )
@@ -203,6 +216,12 @@ opt.y_source_mas = opt.r_source_mas * sin( opt.psi_source_deg * pi / 180 ) ;
   if ~isfield( opt, 'step_mas' )
   opt.step_mas = 5 ;
   end
+
+  % For the rotations with imrotate
+  if ~isfield( opt, 'imrotate' )
+  opt.imrotate = 'nearest' ;
+  end
+
  
 % For the simulation work
 
@@ -215,4 +234,12 @@ opt.y_source_mas = opt.r_source_mas * sin( opt.psi_source_deg * pi / 180 ) ;
   opt.input_image.exozodi = 1 ;
   end
 
-
+%%%%%%%%% Filename where to store the resutls %%%%%%%
+  if ~isfield( opt, 'save_filename' ) || ( rplc_fl_nm )
+  opt.save_filename = sprintf( 'starshade_UtotL_Nx_%i_pix_dl_%inm_dr_%3.1f_mas_psi_%3.1f_deg', ...
+  opt.Nx_pupil_pix, opt.delta_lambda_nm, opt.r_source_mas, opt.psi_source_deg ) ;
+    if strcmp( opt.pupil_file, '0' ) == 1, opt.save_filename = sprintf( '%s_ideal', opt.save_filename ) ; end
+    if opt.diam_img_mas ~= 2000, opt.save_filename = sprintf( '%s_diam_%04i', opt.save_filename, opt.diam_img_mas ) ; end
+% Not used for now.
+%  if opt.Nx_img ~= 400, opt.save_filename = sprintf( '%s_Nx_img_%04i', opt.save_filename, opt.Nx_img ) ; end
+  end

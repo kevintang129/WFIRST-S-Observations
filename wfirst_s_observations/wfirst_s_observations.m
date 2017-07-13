@@ -28,11 +28,11 @@ function opt = wfirst_s_observations( opt )
 
 % The reference coordinates are J2000. For instance, a final position is the result of its value in J2000 plus the proper motion that would tell us where
 % to find its new position in J2000 coordinates, and with parallax added, where it is in that time of the mission again in terms of J2000 coordinates. 
-% Obviously it will be in a different J2000 position that the star's position in J2000, but all is referred to J2000.
+% Obviously it will be in a different J2000 position that the official star's position in J2000 since the time of observation is not 2000.
 % Motion of the starshade increasing Ecliptic longitude, like Earth.
 % Q1: The orbit of WFIRST-S is assumed to be circular (e=0.016, OK) but the effect of other planets on the precise location of the Earth from 2000, assumes
 % constant orbital angular velocity (might not be accurate for some parallaxes?)
-% Optional: use the coordinate transformations tools from:
+% Optional improvement: use the coordinate transformations tools from:
 % https://webhome.weizmann.ac.il/home/eofek/matlab/fun_content.html
 % Nota Bene: Matlab cannot read binary Excel sheets unless in Windows OS. So, this is ExoCat.xlsb, then saved as xlsx.
 
@@ -45,7 +45,7 @@ function opt = wfirst_s_observations( opt )
 % It assumes coordinates of objects are given in J2000. Later projected into any date supllied by the user, e.g., 2028
 % Quick help
 % The initial position of WFIRST-S in the orbit can be set with the angle alpha_0 measured in ecliptical cooordinates:
-% opt.alpha_0 = 0 ; (default value 0 degrees)
+% opt.alpha_0 = 100.41670324 ; (default value 0 degrees) The Heliocentric Ecliptic coordinates for the Earth for 2028 1st January at 0h0m0s is 100 deg 25' 07.9'' (http://cosinekitty.com/solar_system.html). NB: Notice that this code assumes constant orbital speed (with Earth's period computed below) and does not consider leap-years and regular years.
 % The starting time of the observation (for coordinate corrections)
 % opt.first_light_date = 2028 ; (default value year 2028.000. PS: it can be decimal, to include any date, e.g,  2028.123)
 % Days into the mission (day to be added to the first light date)
@@ -1326,7 +1326,7 @@ for i=1:(n_idx)
 days_of_science = (diff_1 + diff_2)/10;
 bad_window = days_of_science > opt.t_obs;
 FWHM = (lambda/opt.diam) * 206264806.247;
-sigma = FWHM/opt.snr; %distance to disambiguate centroid from background
+sigma = 5* FWHM / opt.snr; % distance to disambiguate centroid from background: (Agreed as of 07/13/17 to consider 1 full PSF when SNR=5)
 
 N_sigma_obs = L/sigma;%amount of sigmas per observation window
 dy_obs_wfirst_s;

@@ -199,53 +199,89 @@ starshade_interpolation( opt ) ;
 
 
 % C) Radial interpolation
-clear
+for i_rf = 1 : 2
+clear opt
 opt.developer = 1 ;
+%opt.save_path = '/n/bicepfs1/bicep2/pipeline/maps/1000/wfst/out_dev/' ;
 opt.redo = 0 ;
-opt.create_reference = 1 ;
-opt.polar = 1 ;
-opt.polar_radius_1 = 0 ; % mas
-opt.polar_radius_2 = 120 ; % mas
-opt.polar_alpha_1 = 0 ; % deg
-opt.polar_alpha_2 = 90. / 14 ; % deg (NI2)
+opt.polar_radius_1 = 40 ; % mas
+opt.polar_radius_2 = 150 ; % mas
 opt.delta_lambda_nm = 200 ; % Only one
 opt.save = 1 ;
 % For the analysis
 opt.step_mas = 1 ; % ( 1 )
-opt.n_basis_interpolation = 17 ; % (11)
-opt.super_resolution.res = 1 ;
-opt.super_resolution.interp_method = 'linear' ;
-opt.low_resolution.res = 2 ;
-opt.low_resolution.interp_method = 'spline' ;
-opt.x_planet_mas = 0 ; % ( 0, 30, 120 )
-opt.y_planet_mas = 0 ; % ( 0, 30, 120 )
-starshade_interpolation( opt ) ;
-
-% D) Translation
-% D1) 5 mas/pix (lambda=425 nm, lambda/D = 36 mas)
-clear
-opt.Nx_image_pix = 400 ;
-opt.diam_img_mas = 2000 ;
-starshade_translation( opt ) ;
-
-% D2) 10 mas/pix
-clear
+% mas/pix ( Nx_image_pix=200 and diam_img_mas=2000 -> 10 mas/pix)
 opt.Nx_image_pix = 200 ;
 opt.diam_img_mas = 2000 ;
-starshade_translation( opt ) ;
+opt.plot = 1 ; % Only summary plots
+opt.save_fig = 1 ;
+opt.imrotate = 'nearest' ;
+starshade_radial_interpolation( opt, i_rf ) ;
 
-% D4) 20 mas/pix
+opt.imrotate = 'bilinear' ;
+starshade_radial_interpolation( opt, i_rf ) ;
+opt.plot = 2 ; % Individual and summary plots
+opt.imrotate = 'bicubic' ;
+starshade_radial_interpolation( opt, i_rf ) ;
+
+opt.Nx_image_pix = 400 ;
+opt.imrotate = 'nearest' ;
+opt.plot = 1 ; % Only summary plots
+starshade_radial_interpolation( opt, i_rf ) ;
+opt.imrotate = 'bilinear' ;
+starshade_radial_interpolation( opt, i_rf ) ;
+opt.imrotate = 'bicubic' ;
+starshade_radial_interpolation( opt, i_rf ) ;
+
+opt.Nx_image_pix = 1000 ;
+opt.imrotate = 'nearest' ;
+starshade_radial_interpolation( opt, i_rf ) ;
+opt.imrotate = 'bilinear' ;
+starshade_radial_interpolation( opt, i_rf ) ;
+opt.imrotate = 'bicubic' ;
+starshade_radial_interpolation( opt, i_rf ) ;
+end
+exit
+
+% D) Translation
+
+% D1) 20 mas/pix
 clear
 opt.Nx_image_pix = 100 ;
 opt.diam_img_mas = 2000 ;
+opt.save_fig = 1 ;
 starshade_translation( opt ) ;
 
-% D3) 0.5 mas / pix
+% D2) 17.85 mas/pix
+clear
+opt.Nx_image_pix = 111 ;
+opt.diam_img_mas = 2000 ;
+opt.save_fig = 1 ;
+starshade_translation( opt ) ;
+
+% D3) 10 mas/pix
+clear
+opt.Nx_image_pix = 200 ;
+opt.diam_img_mas = 2000 ;
+opt.save_fig = 1 ;
+starshade_translation( opt ) ;
+
+% D4) 5 mas/pix (lambda=425 nm, lambda/D = 36 mas)
+clear
+opt.Nx_image_pix = 400 ;
+opt.diam_img_mas = 2000 ;
+opt.save_fig = 1 ;
+starshade_translation( opt ) ;
+
+% D5) 0.5 mas / pix
 clear
 opt.Nx_image_pix = 4000 ;
 opt.diam_img_mas = 2000 ;
+opt.save_fig = 1 ;
 starshade_translation( opt ) ;
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % E) Simulation for the non-shaded area
 clear
 opt.Nx_image_pix = 4000 ;
@@ -262,8 +298,41 @@ imagesc( log10( abs( efDefectImg(:,:,1) ).^2 ) ) ; colorbar ; title( 'Exact simu
 figure( 2 )
 imagesc( log10( abs(IntDefectImg(:,:,1) ) ) ) ; colorbar ; title( { 'Exact simulation interpolated at higher resolution. NI2. 425 nm', [ 'Interpolation method: \bf{' opt.interp_method '}. Super resolution factor=' num2str( opt.super_resolution ) ] }, 'FontSize', 14 )
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% F) Interpolation across wavelength
+clear
+opt.developer = 1 ; opt.delta_lambda_nm = 5 ; opt.x_source_mas = 400 ; opt.y_source_mas = 0 ;
+opt.Nx_image_pix = 200 ; opt.save_all = 1 ;
+starshade_wl_interp( opt ) ;
 
+clear
+opt.developer = 1 ; opt.delta_lambda_nm = 5 ; opt.x_source_mas = 120 ; opt.y_source_mas = 0 ;
+opt.Nx_image_pix = 200 ; opt.save_all = 1 ;
+starshade_wl_interp( opt ) ;
 
+clear
+opt.developer = 1 ; opt.delta_lambda_nm = 5 ; opt.x_source_mas = 102.5 ; opt.y_source_mas = 0 ;
+opt.Nx_image_pix = 200 ; opt.save_all = 1 ;
+starshade_wl_interp( opt ) ;
 
+clear
+opt.developer = 1 ; opt.delta_lambda_nm = 5 ; opt.x_source_mas = 100 ; opt.y_source_mas = 0 ;
+opt.Nx_image_pix = 200 ; opt.save_all = 1 ;
+starshade_wl_interp( opt ) ;
 
+clear
+opt.developer = 1 ; opt.delta_lambda_nm = 5 ; opt.x_source_mas = 30 ; opt.y_source_mas = 0 ;
+opt.Nx_image_pix = 200 ; opt.save_all = 1 ;
+starshade_wl_interp( opt ) ;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% G) Plotting the starshade
+% Itself (for NI2!)
+plot_starshade()
+% With angles
+% Angle step (degrees, the semi-angle of a WFIRST-S petal):
+dlt_alph = 90 / 14 ;
+% Series of angles considered:
+alph_lst = [ 0, 1 , 2, 3, 4, 5, 6, 7, 8, 14 ] * dlt_alph ;
+plot_starshade( alph_lst ) ;
 
