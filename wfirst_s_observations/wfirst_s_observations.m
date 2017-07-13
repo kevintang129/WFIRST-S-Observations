@@ -160,7 +160,7 @@ opt_out = opt_in ;
   opt_out.beta_2 = 83 ; % degrees
   end
   if ~isfield( opt_in, 'alpha_0' )
-  opt_out.alpha_0 = 0 ; % degrees
+  opt_out.alpha_0 = 100.41670324 ; % degrees (see comments at the beginning)
   end
   if ~isfield( opt_in, 'first_light_date' )
   opt_out.first_light_date = 2028 ; % year date, can be fractional
