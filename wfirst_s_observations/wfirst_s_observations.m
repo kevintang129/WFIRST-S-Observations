@@ -107,6 +107,10 @@ h_plt = plot_generic( LON_GRID, LAT_GRID, ECL_LAT_GRID, opt ) ;
   saveas( gca, [ opt.path_image 'wfirst-s_' opt.coord '_single_day' ], 'png' ) ;
   end
 
+dbstop if error
+%make_an_error
+%return
+
 % 3.- Getting the positions at a given date for an object
 % For this example, create a list of objects but it should normally be a user-supplied list of object(s)
 opt = list_of_targets( opt ) ;
@@ -273,7 +277,8 @@ LON_GRID = LON_GRID * ( 180 / pi ) ;
 
 % If a day of the mission is provided, then it means that a new starting ecliptic longitude has been chosen
 % Assuming Starshade is orbiting in the direction of increasing ecliptic longitude
-LON_GRID = LON_GRID + opt.alpha_0 ;
+% The addition of 180 degrees reflects the fact that the region where the starshade can be located is opposite to the vector Sun-Telescope (WFIRST), which coincides with Earth's ecliptic longitude, in orer to have an L2 orbit.
+LON_GRID = LON_GRID + opt.alpha_0 + 180 ;
   if ( opt.day_of_mission )
   disp( sprintf( 'One day of the mission has been chosen: %d. Changing the initial ecliptic longitude.', opt.day_of_mission ) )
   LON_GRID = LON_GRID + 360 / l2_period() * opt.day_of_mission ;
@@ -487,6 +492,8 @@ setwinsize(gcf, 980,340);
 hold all
 % Dealing with the circular symmetry
   for i_circ = 1 : 2
+dbstop if error
+%make_an_error
   LON_GRID_1 = LON_GRID ; 
     if ( ( max( LON_GRID_1( : ) - min( LON_GRID_1( : ) ) ) > 180 ) )
     q = find( LON_GRID_1 > 180 ) ;
@@ -496,7 +503,7 @@ hold all
   ECL_LAT_GRID_1 = ECL_LAT_GRID ;
     if i_circ == 1, q = find( LON_GRID_1 < 0 ) ; end
     if i_circ == 2
-    q0 = find( LON_GRID_1 >= -0.01 ) ; % It should be zero, but rounding errors make it better to choose a slight negative value, to avoid reconnected lines between 360 and 0
+    q0 = find( LON_GRID_1 >= -0.1 ) ; % It should be zero, but rounding errors make it better to choose a slight negative value, to avoid reconnected lines between 360 and 0
     q1 = find( LON_GRID_1( q0 ) <= 360 ) ; 
     q = q0( q1 ) ;
     end
@@ -509,7 +516,6 @@ hold all
   % Avoiding warning messages about plotting NaN
   w = warning ('off','all' ) ; %'MATLAB:class:InvalidDynamicPropertyName');
   % Spacing between angles is 5 degrees
-% FIXME: betau and betad should be rewritten in terms of beta_1 and beta_2, or their ecliptic correspondance (and then erase these variables from the script)
   [ dummy h_plt ] = contour( LON_GRID_1, LAT_GRID_1, ECL_LAT_GRID_1, 10 ) ;
   xlim( [ 0, 360 ] ) ;
   ylim( [ -90, 90 ] ) ;
