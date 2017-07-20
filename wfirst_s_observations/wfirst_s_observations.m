@@ -351,7 +351,8 @@ alpha = atan2(sacd,cacd);
 r = sqrt(cacd.^2 + sacd.^2);
 delta = atan2(sd,r);
 r2 = sqrt(sd.^2+r.^2);
-
+% SRH: making the angle belong to [ 0, 2pi )!
+alpha = mod( alpha + 4*pi, 2*pi ) ;
 %sanity check: r2 should be 1
 if sum(abs(r2 - 1)) > 1e-11 ; % 1e-12 originally, a bit exaggerated
     warning('equat2eclip:radiusError',...
@@ -400,6 +401,8 @@ lambda = atan2(cbsl,cbcl);
 r = sqrt(cbsl.^2 + cbcl.^2);
 beta = atan2(sb,r);
 r2 = sqrt(sb.^2+r.^2);
+% SRH: making the angle be in [ 0, 360 )!
+lambda = mod( lambda + 4*pi, 2*pi ) ;
 
 %sanity check: r2 should be 1
 if sum(abs(r2 - 1)) > 1e-12
