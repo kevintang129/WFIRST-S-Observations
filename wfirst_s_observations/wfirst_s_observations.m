@@ -100,16 +100,11 @@ if ( 1 )
 
 % 2.- Observation map for a given date
 clf
-h_plt = plot_generic( LON_GRID, LAT_GRID, ECL_LAT_GRID, opt ) ;
+plot_generic( LON_GRID, LAT_GRID, ECL_LAT_GRID, opt ) ;
   if ( opt.save_image )
-  %set( h_plt,'PaperPositionMode','auto'); % h is figure number
     if ~isdir( opt.path_image ), system( [ 'mkdir -p ' opt.path_image ] ) ; end
   saveas( gca, [ opt.path_image 'wfirst-s_' opt.coord '_single_day' ], 'png' ) ;
   end
-
-dbstop if error
-%make_an_error
-%return
 
 % 3.- Getting the positions at a given date for an object
 % For this example, create a list of objects but it should normally be a user-supplied list of object(s)
@@ -490,33 +485,20 @@ function h_plt = plot_generic( LON_GRID, LAT_GRID, ECL_LAT_GRID, opt )
 figure( 1 ) ; clf
 setwinsize(gcf, 980,340);
 hold all
-% Dealing with the circular symmetry
-  for i_circ = 1 : 2
-dbstop if error
-%make_an_error
-  LON_GRID_1 = LON_GRID ; 
-    if ( ( max( LON_GRID_1( : ) - min( LON_GRID_1( : ) ) ) > 180 ) )
-    q = find( LON_GRID_1 > 180 ) ;
-    LON_GRID_1( q ) = LON_GRID_1( q ) - 360 ;
-    end
-  LAT_GRID_1 = LAT_GRID ;
-  ECL_LAT_GRID_1 = ECL_LAT_GRID ;
-    if i_circ == 1, q = find( LON_GRID_1 < 0 ) ; end
-    if i_circ == 2
-    q0 = find( LON_GRID_1 >= -0.1 ) ; % It should be zero, but rounding errors make it better to choose a slight negative value, to avoid reconnected lines between 360 and 0
-    q1 = find( LON_GRID_1( q0 ) <= 360 ) ; 
-    q = q0( q1 ) ;
-    end
-  % Longitudinal angles between 0 and 360
-  LON_GRID_1 = mod( LON_GRID_1 + 720, 360 ) ;
-  LON_GRID_1( q ) = NaN ;
-  LAT_GRID_1( q ) = NaN ;
-  ECL_LAT_GRID_1( q ) = NaN ;
-   
-  % Avoiding warning messages about plotting NaN
-  w = warning ('off','all' ) ; %'MATLAB:class:InvalidDynamicPropertyName');
+% Dealing with the circular symmetry. 
+LON_GRID = LON_GRID  + 360 - floor( max( LON_GRID( : ) / 360 ) ) * 360 ;
+q = find( LON_GRID > 360 ) ;
+  if numel( q ) ~= 0
+  LON_GRID_1 = LON_GRID * nan ;
+  LAT_GRID_1 = LAT_GRID * nan ;
+  ECL_LAT_GRID_1 = ECL_LAT_GRID * nan ; 
+  LON_GRID_1( q ) = LON_GRID( q ) - 360 ;
+  LAT_GRID_1( q ) = LAT_GRID( q ) ;
+  ECL_LAT_GRID_1( q ) = ECL_LAT_GRID( q ) ;
+  % Setting off warning message about nan
+  warning( 'off', 'MATLAB:contour:NonFiniteData' )
   % Spacing between angles is 5 degrees
-  [ dummy h_plt ] = contour( LON_GRID_1, LAT_GRID_1, ECL_LAT_GRID_1, 10 ) ;
+  contour( LON_GRID_1, LAT_GRID_1, ECL_LAT_GRID_1, 10 ) ;
   xlim( [ 0, 360 ] ) ;
   ylim( [ -90, 90 ] ) ;
   % Borders (the equal longitude limits are unnecessary. Commented out.
@@ -524,7 +506,28 @@ dbstop if error
   %contour( LON_GRID_1(end-1:end, : ), LAT_GRID_1(end-1:end, : ), ECL_LAT_GRID_1( end-1:end, : ), 600, 'k' ) ;
   contour( LON_GRID_1(:, 1:2 ), LAT_GRID_1( :, 1:2 ), ECL_LAT_GRID_1( :, 1:2 ), 600, 'k' ) ;
   contour( LON_GRID_1(:, end-1:end ), LAT_GRID_1( :, end-1:end ), ECL_LAT_GRID_1( :, end-1:end ), 600, 'k' ) ;
-  end % Dealing with the circular symmetry
+  clear q LON_GRID_1 LAT_GRID_1 ECL_LAT_GRID_1
+  q = find( LON_GRID < 360 ) ;
+    if numel( q ) ~= 0
+    LON_GRID_1 = LON_GRID * nan ;
+    LAT_GRID_1 = LAT_GRID * nan ;
+    ECL_LAT_GRID_1 = ECL_LAT_GRID * nan ;
+    LON_GRID_1( q ) = LON_GRID( q ) ;
+    LAT_GRID_1( q ) = LAT_GRID( q ) ;
+    ECL_LAT_GRID_1( q ) = ECL_LAT_GRID( q ) ;
+    % Spacing between angles is 5 degrees
+    contour( LON_GRID_1, LAT_GRID_1, ECL_LAT_GRID_1, 10 ) ;
+    xlim( [ 0, 360 ] ) ;
+    ylim( [ -90, 90 ] ) ;
+    % Borders (the equal longitude limits are unnecessary. Commented out.
+    %contour( LON_GRID_1(1:2, : ), LAT_GRID_1(1:2, : ), ECL_LAT_GRID_1( 1:2, : ), 600, 'k' ) ;
+    %contour( LON_GRID_1(end-1:end, : ), LAT_GRID_1(end-1:end, : ), ECL_LAT_GRID_1( end-1:end, : ), 600, 'k' ) ;
+    contour( LON_GRID_1(:, 1:2 ), LAT_GRID_1( :, 1:2 ), ECL_LAT_GRID_1( :, 1:2 ), 600, 'k' ) ;
+    contour( LON_GRID_1(:, end-1:end ), LAT_GRID_1( :, end-1:end ), ECL_LAT_GRID_1( :, end-1:end ), 600, 'k' ) ;
+    clear q LON_GRID_1 LAT_GRID_1 ECL_LAT_GRID_1
+    end
+  end
+
 xlim( [ 0, 360 ] ) ;
 ylim( [ -90, 90 ] ) ;
 LBL_COORD = { 'ECLIPTIC LON', 'ECLIPTIC LAT' } ;
@@ -533,8 +536,11 @@ LBL_COORD = { 'ECLIPTIC LON', 'ECLIPTIC LAT' } ;
 xlabel( [ LBL_COORD{ 1 }, ' (Degrees) ' ], 'FontSize', 15 ) ;
 ylabel( [ LBL_COORD{ 2 }, ' (Degrees) ' ], 'FontSize', 15 ) ;
 grid
-h = colorbar ;
-ylabel(h, { 'ECLIPTIC LATITUDE WFIRST-S', '(Degrees) ' }, 'FontSize', 15) ;
+  if ~strcmp( opt.coord, 'ecl' )
+  h = colorbar ;
+  ylabel(h, { 'ECLIPTIC LATITUDE WFIRST-S', '(Degrees) ' }, 'FontSize', 15) ;
+  end
+
 ttl = sprintf( 'MISSION FIRST LIGHT %04d. DAY OF MISSION %3.2f', opt.first_light_date, opt.day_of_mission )  ;
   if ( opt.plot_pm ), ttl = { ttl, sprintf( 'PROPER MOTIONS IN %d YEARS', opt.pm_fact ) } ; end
 h_ttl = title( ttl ) ;
@@ -546,7 +552,7 @@ opt = list_of_targets( opt ) ;
 oplot_targets( opt ) ;
 dcm_obj = datacursormode(gcf);
 set(dcm_obj,'UpdateFcn',@myupdatefcn)
-%keyboard
+box on
 
 % A list of targets for testing purposes
 function opt_out = list_of_targets( opt )
