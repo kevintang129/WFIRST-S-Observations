@@ -45,7 +45,7 @@ function opt = wfirst_s_observations( opt )
 % It assumes coordinates of objects are given in J2000. Later projected into any date supllied by the user, e.g., 2028
 % Quick help
 % The initial position of WFIRST-S in the orbit can be set with the angle alpha_0 measured in ecliptical cooordinates:
-% opt.alpha_0 = 100.41670324 ; (default value 0 degrees) The Heliocentric Ecliptic coordinates for the Earth for 2028 1st January at 0h0m0s is 100 deg 25' 07.9'' (http://cosinekitty.com/solar_system.html). NB: Notice that this code assumes constant orbital speed (with Earth's period computed below) and does not consider leap-years and regular years.
+% opt.alpha_0 = 100.41670324 ; (default value 100.41670324 degrees) The Heliocentric Ecliptic coordinates for the Earth for 2028 1st January at 0h0m0s is 100 deg 25' 07.9'' (http://cosinekitty.com/solar_system.html). NB: Notice that this code assumes constant orbital speed (with Earth's period computed below) and does not consider leap-years and regular years.
 % The starting time of the observation (for coordinate corrections)
 % opt.first_light_date = 2028 ; (default value year 2028.000. PS: it can be decimal, to include any date, e.g,  2028.123)
 % Days into the mission (day to be added to the first light date)
@@ -621,7 +621,7 @@ for x=1:L
         dec(x) = num((row)-1,13); 
         pmra(x) = num((row)-1,14);
         pmdec(x) = num((row)-1,15);
-        opt_out.target.pax(x) = 1000*(1/num((row),18));
+        opt_out.target.pax(x) = 1000*(1/num((row)-1,18));
     end 
     %compile data into cell pairs
     opt_out.target.fom = [ 15, 10];
